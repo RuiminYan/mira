@@ -254,6 +254,28 @@ export default async function HomePage() {
         <ActivityMarquee limit={10} variant="feed" />
       </Section>
 
+      <Section
+        eyebrow={locale === "en" ? "Early traction" : "内测进行中"}
+        title={locale === "en" ? "The market is already validating" : "市场已经在验证"}
+        subtitle={
+          locale === "en"
+            ? "Top creators are testing Mira in real scenarios."
+            : "4 位头部达人参与内测,5,000 万粉丝矩阵在真实场景验证产品价值。"
+        }
+      >
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+          <StatCard icon={Crown} label={locale === "en" ? "Top creators" : "头部达人"} value="4" />
+          <StatCard icon={Users} label={locale === "en" ? "Fan reach" : "粉丝矩阵"} value="5000万+" />
+          <StatCard icon={Sparkles} label={locale === "en" ? "Test content" : "内测内容"} value="200+" />
+          <StatCard icon={TrendingUp} label={locale === "en" ? "Engagement" : "互动率"} value="+60%" />
+        </div>
+        <div className="mt-6 text-center">
+          <Link href="/market" className="text-[13.5px] text-brand hover:underline">
+            {locale === "en" ? "See market analysis" : "查看市场分析"} →
+          </Link>
+        </div>
+      </Section>
+
       <Section eyebrow={tr("home.milestone.eyebrow")} title={tr("home.milestone.title")} subtitle={tr("home.milestone.subtitle")}>
         <div className="grid gap-4 md:grid-cols-3">
           {MILESTONES.map((m) => (
@@ -355,6 +377,7 @@ export default async function HomePage() {
       </Section>
 
       <CTA locale={locale} />
+      <ProgressEntry locale={locale} />
       {void SITE_NAME}
     </>
   );
@@ -459,7 +482,7 @@ function CTA({ locale }: { locale: "zh" | "en" }) {
                 <MiniStat icon={Users} value="500+" label={tr("home.cta.stat.koc")} />
                 <MiniStat icon={Briefcase} value="20+" label={tr("home.cta.stat.studio")} />
                 <MiniStat icon={Coins} value="¥10w/mo" label={tr("home.cta.stat.gmv")} />
-                <MiniStat icon={Crown} value="¥3000w" label={tr("home.cta.stat.valuation")} />
+                <MiniStat icon={Crown} value="¥5000w" label={tr("home.cta.stat.valuation")} />
               </div>
             </div>
           </div>
@@ -496,5 +519,38 @@ function MiniStat({ icon: Icon, value, label }: { icon: typeof Users; value: str
       <div className="text-[20px] font-semibold text-ink leading-none">{value}</div>
       <div className="text-[12px] text-ink-3 mt-1.5">{label}</div>
     </div>
+  );
+}
+
+function ProgressEntry({ locale }: { locale: "zh" | "en" }) {
+  return (
+    <section className="border-t border-line bg-gradient-to-r from-[#6E59F6]/[0.08] via-bg to-[#FF6FB4]/[0.08]">
+      <div className="container-page py-10 md:py-12 flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-start gap-4">
+          <span className="hidden sm:grid h-11 w-11 shrink-0 place-items-center rounded-md bg-gradient-to-br from-[#6E59F6] to-[#FF6FB4] text-white">
+            <Workflow size={20} />
+          </span>
+          <div>
+            <div className="text-[11px] uppercase tracking-[0.18em] text-ink-3 mb-1.5">
+              {locale === "en" ? "Progress report" : "建设成果汇报"}
+            </div>
+            <h2 className="text-[20px] md:text-[24px] font-semibold text-ink leading-snug">
+              {locale === "en" ? "See what we have built so far" : "看看我们目前都做了什么"}
+            </h2>
+            <p className="mt-1.5 text-[13.5px] leading-6 text-ink-3 max-w-xl">
+              {locale === "en"
+                ? "A visual walkthrough of the full business loop, the frontend experience and the backend capabilities."
+                : "图文呈现完整业务闭环、前端体验与后端能力,适合向上汇报与对外介绍。"}
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/progress"
+          className="inline-flex shrink-0 items-center gap-2 rounded-md px-5 py-2.5 text-[14px] font-medium text-white bg-gradient-to-r from-[#6E59F6] to-[#FF6FB4] hover:brightness-110 transition"
+        >
+          {locale === "en" ? "View progress" : "查看建设成果"} <ArrowRight size={16} />
+        </Link>
+      </div>
+    </section>
   );
 }

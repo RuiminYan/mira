@@ -94,6 +94,12 @@ const PRICE_STAGES = [
   },
 ];
 
+const REVENUE_MIX = [
+  { tag: "L1", title: "交易佣金", pct: "40%", desc: "每笔人脸授权交易抽取 10–20%;品牌定制 / 场景 IP 授权抽成 15%。", payer: "制作方 / 品牌方" },
+  { tag: "L2", title: "发行分账", pct: "35%", desc: "授权脸的短剧上线后,从制作方的发行分账收入中抽取 5–10%。", payer: "制作方" },
+  { tag: "L3", title: "Token 消耗", pct: "25%", desc: "制作方调用 AI 生成(配角表演),按生成时长或 Token 量付费。", payer: "制作方" },
+];
+
 export default function ProductPage() {
   return (
     <>
@@ -184,6 +190,21 @@ export default function ProductPage() {
         title="三层漏斗模型 · 三阶段定价演进"
         subtitle="授权费佣金 → 发行分账抽成 → AI 工具/Token 消耗,收入结构逐级上扬。"
       >
+        <div className="text-[12px] uppercase tracking-widest text-ink-3 mb-4">成熟期收入结构占比</div>
+        <div className="grid gap-4 md:grid-cols-3 mb-10">
+          {REVENUE_MIX.map((r) => (
+            <div key={r.tag} className="glass rounded-[16px] p-6">
+              <div className="flex items-baseline justify-between mb-3">
+                <span className="rounded-md bg-brand-soft px-2 py-0.5 text-[12px] font-semibold text-brand">{r.tag}</span>
+                <span className="text-[28px] font-semibold text-gradient leading-none">{r.pct}</span>
+              </div>
+              <div className="text-[16px] font-semibold text-ink mb-1.5">{r.title}</div>
+              <p className="text-[13px] leading-6 text-ink-3">{r.desc}</p>
+              <div className="mt-3 text-[12px] text-ink-4">收费对象:{r.payer}</div>
+            </div>
+          ))}
+        </div>
+        <div className="text-[12px] uppercase tracking-widest text-ink-3 mb-4">三阶段定价演进</div>
         <div className="grid gap-4 md:grid-cols-3">
           {PRICE_STAGES.map((s, i) => (
             <div key={s.tag} className="glass rounded-[16px] p-6 relative overflow-hidden">

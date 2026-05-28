@@ -36,7 +36,7 @@ const TEAM = [
     name: "孙楚婷",
     icon: TrendingUp,
     tag: "02 年 · 中央财大金融学硕士",
-    desc: "26 届毕业生,负责供需双边运营节奏与平台增长打法。",
+    desc: "网易实习经历 + 4 年新媒体运营经验,负责供需双边运营节奏与平台增长打法。",
     accent: "from-[#FF6FB4] to-[#FBBF24]",
   },
   {

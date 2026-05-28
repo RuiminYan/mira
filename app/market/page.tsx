@@ -10,6 +10,12 @@ import {
   ShieldAlert,
   Coins,
   ArrowUpRight,
+  CheckCircle2,
+  Star,
+  Network,
+  Crown,
+  FileCheck,
+  ShieldCheck,
 } from "lucide-react";
 import { Section } from "@/components/Section";
 import { FeatureCard, StatCard } from "@/components/Card";
@@ -62,9 +68,47 @@ const RISKS = [
 ];
 
 const COMP = [
-  { name: "爱奇艺纳豆 Pro", note: "传统艺人授权,流量价值远大于形象价值,艺人在产品里赚不到大钱。" },
+  { name: "爱奇艺纳逗 Pro", note: "传统艺人授权,流量价值远大于形象价值,艺人在产品里赚不到大钱。" },
   { name: "字节跳动", note: "大厂决策慢,核心精力在大模型;内部缺内容创作者视角。" },
   { name: "传统影视公司", note: "思维保守,缺跨界融合思维与轻资产撮合能力。" },
+];
+
+const TRACTION = [
+  { name: "塑料叉", fans: "500 万+" },
+  { name: "小鸣同学", fans: "800 万+" },
+  { name: "蓝江律师", fans: "500 万+" },
+  { name: "尤拉", fans: "100 万+" },
+];
+
+const SURVEY = [
+  {
+    title: "AI 制作公司粗放收集人脸素材",
+    desc: "大量 AI 影视公司以「招募演员」「短剧演员招募」名义,未获授权收集人脸素材用于 AI 换脸短剧制作。",
+  },
+  {
+    title: "艺人与网红被盗用人脸泛滥",
+    desc: "大量艺人、网红人脸被 AI 换脸用于短剧等内容,未获授权,严重侵害肖像权并造成负面影响。",
+  },
+  {
+    title: "网红 KOL 对授权参演兴趣昂然",
+    desc: "调研 50 位百万粉以上 KOL,超 80% 愿意授权人脸出演短剧,合理授权与分账下合作意愿强烈。",
+  },
+];
+
+const MOAT = [
+  { n: "01", icon: Network, title: "双边网络效应", desc: "KOC 越多 → 制作方选择越多 → 用得越多 → 更多 KOC 加入,正循环自我强化。" },
+  { n: "02", icon: Layers, title: "分账数据沉淀", desc: "KOC 历史分账记录形成转移成本,换平台等于放弃已积累的收益证明。" },
+  { n: "03", icon: Crown, title: "独家授权锁定", desc: "对高频分账 KOC 提供独家签约,从供给侧切断竞品。" },
+  { n: "04", icon: FileCheck, title: "行业标准先发", desc: "联合律所发布《AI 人脸授权行业标准》,成为事实上的规则制定者。" },
+  { n: "05", icon: ShieldCheck, title: "合规深度", desc: "授权边界、数据安全、被遗忘权全链路合规设计,大厂难以短期复制。" },
+];
+
+const FUND_USE = [
+  { use: "技术开发(轻量平台)", pct: "30–40%", note: "Web 展示页 + KOC 自助上传 + 分账记录后台" },
+  { use: "KOC 签约激励", pct: "20–30%", note: "支付首批 500 个 KOC 授权费(每人 ¥100–300)" },
+  { use: "运营与市场", pct: "20–25%", note: "1–2 人运营团队、制作方拓展、KOC 社群维护" },
+  { use: "法务合规", pct: "10–15%", note: "授权协议模板、律师咨询、软著申请、公司注册" },
+  { use: "备用金", pct: "5–10%", note: "应急或突发机会" },
 ];
 
 export default function MarketPage() {
@@ -98,6 +142,62 @@ export default function MarketPage() {
         <div className="grid gap-4 md:grid-cols-2">
           <Picture title="供给端 · KOC 授权方" rows={SUPPLY} accent="brand" />
           <Picture title="需求端 · 制作方" rows={DEMAND} accent="pink" />
+        </div>
+      </Section>
+
+      <Section
+        eyebrow="市场验证"
+        title={<>4 位头部达人内测 · <span className="text-gradient">5,000 万粉丝矩阵</span> 整齐待发</>}
+        subtitle="不是 PPT 概念 —— 真实头部达人已参与内测,在真实场景里验证产品价值并持续打磨。"
+      >
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {TRACTION.map((p) => (
+            <div key={p.name} className="glass rounded-[14px] p-6 text-center">
+              <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full text-white text-[20px] font-semibold bg-gradient-to-br from-[#6E59F6] to-[#FF6FB4]">
+                {p.name.slice(0, 1)}
+              </div>
+              <div className="flex items-center justify-center gap-1.5 text-[16px] font-semibold text-ink">
+                {p.name}
+                <CheckCircle2 size={15} className="text-brand-2" />
+              </div>
+              <div className="mt-1 text-[13px] text-ink-3">粉丝 {p.fans}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-6 grid gap-4 grid-cols-2 lg:grid-cols-4">
+          <StatCard icon={Users} label="头部达人参与" value="4 位" />
+          <StatCard icon={Sparkles} label="粉丝矩阵规模" value="5000万+" />
+          <StatCard icon={TrendingUp} label="内测内容创作" value="200+ 条" />
+          <StatCard icon={Star} label="平均互动率提升" value="+60%" />
+        </div>
+      </Section>
+
+      <Section
+        tone="raised"
+        eyebrow="市场调研"
+        title="真实痛点已被一线验证"
+        subtitle="通过社群、招募平台、短剧制作方广告等渠道,收集分析超 200 条招募信息,并访谈 50 位百万粉 KOL。"
+      >
+        <div className="grid gap-4 md:grid-cols-3">
+          {SURVEY.map((s, i) => (
+            <div key={s.title} className="glass rounded-[14px] p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="grid h-7 w-7 place-items-center rounded-md bg-brand-soft text-[12px] font-semibold text-brand">
+                  {i + 1}
+                </span>
+                <span className="text-[12px] uppercase tracking-widest text-ink-3">结论 {i + 1}</span>
+              </div>
+              <div className="text-[15px] font-semibold text-ink mb-2">{s.title}</div>
+              <p className="text-[13.5px] leading-6 text-ink-3">{s.desc}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-6 glass rounded-[14px] p-6 md:p-8 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="text-[40px] md:text-[48px] font-semibold text-gradient leading-none shrink-0">80%+</div>
+          <p className="text-[14px] md:text-[15px] leading-7 text-ink-2">
+            受访的 50 位百万粉以上 KOL 中,<span className="text-ink font-medium">超 80% 表示愿意授权人脸出演短剧</span>,
+            在合理授权与收益分成的前提下合作意愿强烈,看好 AI 短剧的市场潜力与长期收益。
+          </p>
         </div>
       </Section>
 
@@ -181,22 +281,57 @@ export default function MarketPage() {
             </p>
           </div>
         </div>
+
+        <div className="mt-10">
+          <div className="text-[12px] uppercase tracking-widest text-ink-3 mb-4">商业模式护城河</div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {MOAT.map((m) => (
+              <div key={m.n} className="glass rounded-[14px] p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-brand-soft text-brand">
+                    <m.icon size={18} />
+                  </span>
+                  <span className="text-[18px] font-semibold text-gradient leading-none">{m.n}</span>
+                </div>
+                <div className="text-[15px] font-semibold text-ink mb-1.5">{m.title}</div>
+                <p className="text-[13px] leading-6 text-ink-3">{m.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </Section>
 
       <Section
         tone="raised"
         eyebrow="融资规划"
-        title={<>种子轮 ¥300 万 · 出让 10% · <span className="text-gradient">投后估值 ¥3,000 万</span></>}
-        subtitle="MVP 验证成功后 3 个月内打满闭环,跑通供需双端节奏。"
+        title={<>种子轮 ¥500 万 · 出让 10% · <span className="text-gradient">投后估值 ¥5,000 万</span></>}
+        subtitle="MVP 验证成功后启动,12 个月资金周期内跑通供需双端、打满最小闭环。"
       >
         <div className="grid gap-4 md:grid-cols-3">
-          <FeatureCard icon={Coins} title="资金周期" description="资金使用周期 3 个月(4–6 月),完成种子里程碑。" />
+          <FeatureCard icon={Coins} title="资金周期" description="资金使用周期 12 个月,完成种子里程碑。" />
           <FeatureCard
             icon={TrendingUp}
             title="种子里程碑"
             description="KOC ≥ 500(独家 50)/ 制作方 ≥ 20(复购 5+)/ 月交易 ≥ 10 万 / 平台月收入 ≥ 2 万。"
           />
           <FeatureCard icon={Layers} title="生态联动" description="Web V1.0 上线 + 与 ≥ 1 家大厂(红果 / 抖音)建立合作接触。" />
+        </div>
+
+        <div className="mt-6 glass rounded-[14px] overflow-hidden">
+          <div className="px-5 md:px-6 py-3 border-b border-line text-[12px] uppercase tracking-widest text-ink-3">
+            资金用途明细
+          </div>
+          <div className="divide-y divide-line">
+            {FUND_USE.map((f) => (
+              <div key={f.use} className="grid grid-cols-[1fr_auto] gap-3 px-5 md:px-6 py-3 items-center">
+                <div>
+                  <div className="text-[14px] text-ink">{f.use}</div>
+                  <div className="text-[12.5px] text-ink-3 mt-0.5">{f.note}</div>
+                </div>
+                <div className="text-[15px] font-semibold text-gradient whitespace-nowrap">{f.pct}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </Section>
     </>

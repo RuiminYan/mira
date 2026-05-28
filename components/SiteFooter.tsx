@@ -8,6 +8,7 @@ export async function SiteFooter() {
     {
       title: tr("footer.col.product"),
       items: [
+        { href: "/progress", label: locale === "en" ? "What we built" : "建设成果" },
         { href: "/product", label: tr("footer.product.architecture") },
         { href: "/marketplace", label: tr("footer.product.marketplace") },
         { href: "/studio", label: tr("footer.product.studio") },

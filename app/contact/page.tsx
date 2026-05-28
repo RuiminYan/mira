@@ -16,7 +16,7 @@ export default function ContactPage() {
         <div className="grid gap-4 md:grid-cols-3">
           <Intro icon={Sparkles} title="创作者" desc="把你的脸资产化,接入短剧、品牌、出海等多种授权场景。" />
           <Intro icon={Briefcase} title="制作方" desc="拿合规 AI 演员、灵活套餐与版权交付包,直接落地内容生产。" />
-          <Intro icon={Banknote} title="投资人" desc="种子轮 ¥300 万 · 10% · 投后 ¥3000 万,3 个月闭环可见。" />
+          <Intro icon={Banknote} title="投资人" desc="种子轮 ¥500 万 · 10% · 投后 ¥5000 万,12 个月跑通最小闭环。" />
         </div>
       </Section>
 
