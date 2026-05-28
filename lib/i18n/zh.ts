@@ -303,6 +303,11 @@ const zh: Dict = {
   "login.nickname.label": "昵称",
   "login.nickname.placeholder": "不填会用邮箱前缀",
   "login.submit": "以「{role}」身份继续",
+  "login.signin.heading.pre": "欢迎回来 · ",
+  "login.signin.heading.em": "登录 Mira",
+  "login.signin.body":
+    "输入注册时用的邮箱即可登录,自动进入你所属的后台。还没有账号?用「开始上链」从创作者入口注册。",
+  "login.signin.submit": "登录",
   "login.hint":
     "已有内置测试账号:yuhan@mira.test / studio@xinghe.test / admin@mira.test",
 

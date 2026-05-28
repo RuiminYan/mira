@@ -300,6 +300,11 @@ const en: Dict = {
   "login.nickname.label": "Nickname",
   "login.nickname.placeholder": "Defaults to the email prefix",
   "login.submit": "Continue as {role}",
+  "login.signin.heading.pre": "Welcome back · ",
+  "login.signin.heading.em": "Sign in",
+  "login.signin.body":
+    "Enter the email you registered with and you'll land in your own dashboard. New here? Use “Get started” to sign up as a creator.",
+  "login.signin.submit": "Sign in",
   "login.hint":
     "Built-in test accounts: yuhan@mira.test / studio@xinghe.test / admin@mira.test",
 

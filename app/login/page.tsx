@@ -25,19 +25,26 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
   const locale = await getLocale();
   const tr = (k: string, v?: Record<string, string | number>) => t(k, locale, v);
   const sp = await searchParams;
-  const role: Role =
-    sp.role === "partner" || sp.role === "admin" || sp.role === "mcn"
+  const explicitRole: Role | null =
+    sp.role === "creator" ||
+    sp.role === "partner" ||
+    sp.role === "admin" ||
+    sp.role === "mcn"
       ? (sp.role as Role)
-      : "creator";
-  const next =
-    sp.next ||
-    (role === "partner"
+      : null;
+  // 无 role 参数 = 中立"登录"入口(老用户回流),不强推任何身份
+  const neutral = !explicitRole;
+  const role: Role = explicitRole ?? "creator";
+  const roleDash =
+    role === "partner"
       ? "/partner"
       : role === "admin"
         ? "/admin"
         : role === "mcn"
           ? "/mcn"
-          : "/creator");
+          : "/creator";
+  // 中立登录落点为 "/",交给登录后按真实角色路由
+  const next = sp.next || (neutral ? "/" : roleDash);
 
   const u = await getCurrentUser();
   if (u) redirect(next);
@@ -51,7 +58,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
     const email = String(formData.get("email") || "").trim().toLowerCase();
     const nickname = String(formData.get("nickname") || "");
     const r = (formData.get("role") || "creator") as Role;
-    const n = String(formData.get("next") || "/creator");
+    const n = String(formData.get("next") || "/");
     const refCode = String(formData.get("ref") || "");
     const before = email
       ? db.select().from(schema.users).where(eq(schema.users.email, email)).get()
@@ -60,7 +67,16 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
     if (refCode && !before) {
       bindReferral(user.id, refCode);
     }
-    redirect(n);
+    // 落点为首页时,按用户真实角色进对应后台;深链照常尊重
+    const dash =
+      user.role === "partner"
+        ? "/partner"
+        : user.role === "admin"
+          ? "/admin"
+          : user.role === "mcn"
+            ? "/mcn"
+            : "/creator";
+    redirect(n === "/" ? dash : n);
   }
 
   const labelOf = (r: Role) =>
@@ -72,22 +88,22 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
         <div>
           <div className="text-[12px] uppercase tracking-widest text-ink-3 mb-3">{tr("login.title")}</div>
           <h1 className="text-balance text-[34px] md:text-[44px] font-semibold leading-tight">
-            {tr("login.heading.pre")}
-            <span className="text-gradient">{tr("login.heading.em")}</span>
+            {tr(neutral ? "login.signin.heading.pre" : "login.heading.pre")}
+            <span className="text-gradient">{tr(neutral ? "login.signin.heading.em" : "login.heading.em")}</span>
           </h1>
-          <p className="mt-4 text-ink-3 text-[15px] leading-7 max-w-xl">{tr("login.body")}</p>
+          <p className="mt-4 text-ink-3 text-[15px] leading-7 max-w-xl">{tr(neutral ? "login.signin.body" : "login.body")}</p>
 
           <div className="mt-8 grid gap-3">
-            <RolePill kind="creator" current={role}>
+            <RolePill kind="creator" current={explicitRole ?? ""}>
               <Sparkles size={16} /> {tr("role.identity.creator")}
             </RolePill>
-            <RolePill kind="partner" current={role}>
+            <RolePill kind="partner" current={explicitRole ?? ""}>
               <Briefcase size={16} /> {tr("role.identity.partner")}
             </RolePill>
-            <RolePill kind="admin" current={role}>
+            <RolePill kind="admin" current={explicitRole ?? ""}>
               <Shield size={16} /> {tr("role.identity.admin")}
             </RolePill>
-            <RolePill kind="mcn" current={role}>
+            <RolePill kind="mcn" current={explicitRole ?? ""}>
               <Network size={16} /> {tr("role.identity.mcn")}
             </RolePill>
           </div>
@@ -120,7 +136,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
               type="submit"
               className="mt-2 inline-flex items-center justify-center rounded-md px-5 py-2.5 text-[14px] font-medium text-white bg-gradient-to-r from-[#6E59F6] to-[#FF6FB4] hover:brightness-110 transition shadow-[0_10px_30px_-12px_rgba(110,89,246,0.55)]"
             >
-              {tr("login.submit", { role: labelOf(role) })}
+              {neutral ? tr("login.signin.submit") : tr("login.submit", { role: labelOf(role) })}
             </button>
             <p className="text-[12px] text-ink-4 mt-1">{tr("login.hint")}</p>
           </form>
