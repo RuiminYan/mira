@@ -31,21 +31,23 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build Next standalone
-        env:
-          NODE_ENV: production
-        run: pnpm build
-
-      # 在 CI 里造出 seed 好的演示库,作为初次部署的初始 DB 一起 scp 过去。
+      # 必须排在 build 之前:静态页 (/sitemap.xml 等) 在构建期就查 DB 预渲染,
+      # 没有已建表的 data.db 会报 "no such table"。seed 到默认路径 ./data.db,build 直接读它;
+      # 同一份库随包发出去作初始演示数据。
       - name: Seed demo database
         env:
-          MIRA_DB_PATH: ./seed-data.db
+          MIRA_DB_PATH: ./data.db
         run: |
           pnpm db:migrate
           pnpm db:seed
           # WAL checkpoint,让单个 .db 文件自包含 (无需带 -wal/-shm 边车)
           node -e "const D=require('better-sqlite3');const d=new D(process.env.MIRA_DB_PATH);d.pragma('wal_checkpoint(TRUNCATE)');d.close()"
-          ls -lh seed-data.db
+          ls -lh data.db
+
+      - name: Build Next standalone
+        env:
+          NODE_ENV: production
+        run: pnpm build
 
       # output:standalone 把入口产到 .next/standalone/server.js (非 monorepo,无嵌套)。
       # static/ + public/ 必须手动拷进 standalone 树 (Next 文档要求)。
@@ -56,7 +58,7 @@ jobs:
           mkdir -p "$ENTRY/.next"
           cp -r .next/static "$ENTRY/.next/static"
           [ -d public ] && cp -r public "$ENTRY/public"
-          cp seed-data.db "$ENTRY/seed-data.db"
+          cp data.db "$ENTRY/seed-data.db"
           # systemd 调用的 wrapper:定位最新 nvm Node 再起 server.js (服务器 node 仅在 nvm 下)
           cat > "$ENTRY/start.sh" <<'EOF'
           #!/bin/sh
