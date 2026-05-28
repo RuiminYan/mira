@@ -11,6 +11,7 @@ type Props = {
   subtitle: string;
   accent: "brand" | "pink" | "cyan";
   fields?: { name?: string; contact?: string; message?: string };
+  locale?: string;
 };
 
 const ACCENT_BG: Record<Props["accent"], string> = {
@@ -19,7 +20,8 @@ const ACCENT_BG: Record<Props["accent"], string> = {
   cyan: "from-[#22D3EE] to-[#6E59F6]",
 };
 
-export function LeadForm({ id, kind, title, subtitle, accent, fields }: Props) {
+export function LeadForm({ id, kind, title, subtitle, accent, fields, locale }: Props) {
+  const en = locale === "en";
   const [pending, start] = useTransition();
   const [state, setState] = useState<{ ok?: boolean; error?: string }>({});
 
@@ -43,26 +45,26 @@ export function LeadForm({ id, kind, title, subtitle, accent, fields }: Props) {
       <form action={onSubmit} className="grid gap-3">
         <input type="hidden" name="kind" value={kind} />
         <Field
-          label="称呼"
+          label={en ? "Name" : "称呼"}
           name="name"
-          placeholder={fields?.name ?? "你的姓名 / 团队"}
+          placeholder={fields?.name ?? (en ? "Your name / team" : "你的姓名 / 团队")}
           required
         />
         <Field
-          label="联系方式"
+          label={en ? "Contact" : "联系方式"}
           name="contact"
-          placeholder={fields?.contact ?? "微信 / 邮箱 / 手机"}
+          placeholder={fields?.contact ?? (en ? "WeChat / email / phone" : "微信 / 邮箱 / 手机")}
           required
         />
         <Field
-          label="想说的"
+          label={en ? "Message" : "想说的"}
           name="message"
-          placeholder={fields?.message ?? "可选,简单介绍一下"}
+          placeholder={fields?.message ?? (en ? "Optional — tell us a bit about yourself" : "可选,简单介绍一下")}
           textarea
         />
 
         <div className="flex items-center justify-between gap-3 mt-1">
-          <Status state={state} />
+          <Status state={state} en={en} />
           <button
             type="submit"
             disabled={pending}
@@ -73,7 +75,7 @@ export function LeadForm({ id, kind, title, subtitle, accent, fields }: Props) {
             }
           >
             {pending ? <Loader2 size={14} className="animate-spin" /> : null}
-            {pending ? "提交中…" : "提交线索"}
+            {pending ? (en ? "Submitting…" : "提交中…") : en ? "Submit" : "提交线索"}
           </button>
         </div>
       </form>
@@ -108,11 +110,11 @@ function Field({
   );
 }
 
-function Status({ state }: { state: { ok?: boolean; error?: string } }) {
+function Status({ state, en }: { state: { ok?: boolean; error?: string }; en?: boolean }) {
   if (state.ok)
     return (
       <span className="inline-flex items-center gap-1.5 text-[13px] text-emerald-400">
-        <CheckCircle2 size={14} /> 已收到,我们会尽快联系你
+        <CheckCircle2 size={14} /> {en ? "Got it — we'll be in touch soon" : "已收到,我们会尽快联系你"}
       </span>
     );
   if (state.error)
@@ -121,5 +123,9 @@ function Status({ state }: { state: { ok?: boolean; error?: string } }) {
         <AlertCircle size={14} /> {state.error}
       </span>
     );
-  return <span className="text-[12px] text-ink-4">提交后我们会通过你留的联系方式回复</span>;
+  return (
+    <span className="text-[12px] text-ink-4">
+      {en ? "We'll reply via the contact details you leave" : "提交后我们会通过你留的联系方式回复"}
+    </span>
+  );
 }
