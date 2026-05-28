@@ -29,6 +29,9 @@ const TABLE_LABEL_ZH: Record<string, string> = {
   nfts: "NFT",
   studio_jobs: "AI 生成",
   studio_recharges: "算力充值",
+  wallet_txns: "钱包流水",
+  withdrawals: "提现",
+  distributions: "分发",
 };
 
 const TABLE_LABEL_EN: Record<string, string> = {
@@ -41,6 +44,9 @@ const TABLE_LABEL_EN: Record<string, string> = {
   nfts: "NFT",
   studio_jobs: "AI gen",
   studio_recharges: "Credits",
+  wallet_txns: "Wallet",
+  withdrawals: "Payout",
+  distributions: "Distribution",
 };
 
 export default async function ChainExplorerPage() {

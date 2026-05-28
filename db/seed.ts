@@ -845,16 +845,8 @@ function seed() {
     refId: number | null
   ) {
     const w = ensureWallet(uid);
-    const cr = mintRecord("wallet_txns", w.id, {
-      userId: uid,
-      kind,
-      amount: amountFen,
-      refTable,
-      refId,
-      note,
-      at: now(),
-    });
-    db.insert(schema.walletTxns)
+    const txn = db
+      .insert(schema.walletTxns)
       .values({
         walletId: w.id,
         kind,
@@ -862,9 +854,24 @@ function seed() {
         refTable,
         refId,
         note,
-        chainRecordId: cr.id,
         createdAt: now(),
       })
+      .returning()
+      .get();
+    // refId 指向这条流水本身,(refTable, refId) 才是有效的回查指针
+    const cr = mintRecord("wallet_txns", txn.id, {
+      userId: uid,
+      walletId: w.id,
+      kind,
+      amount: amountFen,
+      refTable,
+      refId,
+      note,
+      at: now(),
+    });
+    db.update(schema.walletTxns)
+      .set({ chainRecordId: cr.id })
+      .where(eq(schema.walletTxns.id, txn.id))
       .run();
     db.update(schema.wallets)
       .set({

@@ -58,15 +58,6 @@ export function credit(
 ): CreditResult {
   if (amount <= 0) return { ok: false, error: "amount must be positive" };
   const w = getOrCreateWallet(userId);
-  const cr = mintRecord("wallet_txns", w.id, {
-    userId,
-    kind,
-    amount,
-    refTable,
-    refId,
-    note,
-    at: now(),
-  });
   const txn = db
     .insert(schema.walletTxns)
     .values({
@@ -76,11 +67,25 @@ export function credit(
       refTable,
       refId,
       note,
-      chainRecordId: cr.id,
       createdAt: now(),
     })
     .returning()
     .get();
+  // refId 指向这条流水本身,(refTable, refId) 才是有效的回查指针
+  const cr = mintRecord("wallet_txns", txn.id, {
+    userId,
+    walletId: w.id,
+    kind,
+    amount,
+    refTable,
+    refId,
+    note,
+    at: now(),
+  });
+  db.update(schema.walletTxns)
+    .set({ chainRecordId: cr.id })
+    .where(eq(schema.walletTxns.id, txn.id))
+    .run();
   const after = db
     .update(schema.wallets)
     .set({
@@ -91,7 +96,7 @@ export function credit(
     .where(eq(schema.wallets.id, w.id))
     .returning()
     .get();
-  return { ok: true, txn, wallet: after };
+  return { ok: true, txn: { ...txn, chainRecordId: cr.id }, wallet: after };
 }
 
 export function debit(
@@ -105,15 +110,6 @@ export function debit(
   if (amount <= 0) return { ok: false, error: "amount must be positive" };
   const w = getOrCreateWallet(userId);
   if (w.balance < amount) return { ok: false, error: "余额不足" };
-  const cr = mintRecord("wallet_txns", w.id, {
-    userId,
-    kind,
-    amount: -amount,
-    refTable,
-    refId,
-    note,
-    at: now(),
-  });
   const txn = db
     .insert(schema.walletTxns)
     .values({
@@ -123,11 +119,25 @@ export function debit(
       refTable,
       refId,
       note,
-      chainRecordId: cr.id,
       createdAt: now(),
     })
     .returning()
     .get();
+  // refId 指向这条流水本身,(refTable, refId) 才是有效的回查指针
+  const cr = mintRecord("wallet_txns", txn.id, {
+    userId,
+    walletId: w.id,
+    kind,
+    amount: -amount,
+    refTable,
+    refId,
+    note,
+    at: now(),
+  });
+  db.update(schema.walletTxns)
+    .set({ chainRecordId: cr.id })
+    .where(eq(schema.walletTxns.id, txn.id))
+    .run();
   const after = db
     .update(schema.wallets)
     .set({
@@ -138,7 +148,7 @@ export function debit(
     .where(eq(schema.wallets.id, w.id))
     .returning()
     .get();
-  return { ok: true, txn, wallet: after };
+  return { ok: true, txn: { ...txn, chainRecordId: cr.id }, wallet: after };
 }
 
 const KIND_LABEL: Record<WalletTxnKind, string> = {
