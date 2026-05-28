@@ -14,7 +14,7 @@ AIGC 数字资产 + AI 人脸授权平台原型。Next.js 16 + React 19 + TS + T
 
 ## 校验
 - typecheck 用 tsgo:`pnpm typecheck`;纯 CSS / 文本 / 注释改动跳过。
-- 冒烟:`pnpm smoke`(改 route / server action / API 后跑)。
+- 冒烟:`pnpm smoke`(改 route / server action / API 后跑);只覆盖公开路由 + 登录墙,带鉴权闭环要手动 / 浏览器验。
 
 ## 部署
 - 线上 https://mira.cuberoot.me;push main → `.github/workflows/deploy.yml`(CI build + scp)。
