@@ -178,6 +178,16 @@ export async function updateOrderStatus(formData: FormData) {
   if (!allowed.includes(status)) redirect("/admin");
 
   const before = db.select().from(schema.orders).where(eq(schema.orders.id, orderId)).get();
+  // 结算前必须确认已有成功支付,避免对未收款订单结算并给创作者钱包入账
+  if (status === "settled") {
+    const paid = db
+      .select()
+      .from(schema.payments)
+      .where(eq(schema.payments.orderId, orderId))
+      .all()
+      .some((p) => p.status === "succeeded");
+    if (!paid) redirect("/admin?err=unpaid");
+  }
   db.update(schema.orders).set({ status }).where(eq(schema.orders.id, orderId)).run();
 
   // delivery pack on delivered
