@@ -87,7 +87,14 @@ export default async function HomePage() {
   const platformChain =
     db.get<{ c: number }>(sql`SELECT COUNT(*) as c FROM chain_records`)?.c ?? 0;
 
-  const TRUSTED = ["段和段律所", "上海仲裁委", "蚂蚁链", "红果短剧", "星河短剧工作室", "寒拾文化 MCN"];
+  const TRUSTED: { name: string; url?: string }[] = [
+    { name: "段和段律所", url: "https://duanduan.com/" },
+    { name: "上海仲裁委", url: "https://www.accsh.org/" },
+    { name: "蚂蚁链", url: "https://antchain.antgroup.com/" },
+    { name: "红果短剧" },
+    { name: "星河短剧工作室" },
+    { name: "寒拾文化 MCN" },
+  ];
 
   const insights = featuredArticles(3);
 
@@ -111,14 +118,23 @@ export default async function HomePage() {
             {locale === "en" ? "Trusted by" : "合作 ・ 信任伙伴"}
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-            {TRUSTED.map((name) => (
-              <div
-                key={name}
-                className="px-3 py-3 text-center text-[12.5px] text-ink-3"
-              >
-                {name}
-              </div>
-            ))}
+            {TRUSTED.map((p) =>
+              p.url ? (
+                <a
+                  key={p.name}
+                  href={p.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-3 text-center text-[12.5px] text-ink-3 transition hover:text-ink hover:underline underline-offset-4"
+                >
+                  {p.name}
+                </a>
+              ) : (
+                <div key={p.name} className="px-3 py-3 text-center text-[12.5px] text-ink-3">
+                  {p.name}
+                </div>
+              )
+            )}
           </div>
         </div>
       </section>
