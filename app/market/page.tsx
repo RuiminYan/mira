@@ -111,6 +111,56 @@ const FUND_USE = [
   { use: "备用金", pct: "5–10%", note: "应急或突发机会" },
 ];
 
+const GROWTH_PHASES = [
+  {
+    icon: Sparkles,
+    tag: "冷启动期",
+    span: "0–3 个月",
+    points: [
+      "签约 KOC 50 → 500 人",
+      "合作制作方 1 → 20 家",
+      "月平台交易 ¥1 万 → ¥10 万",
+      "完成 ≥ 1 个标杆成功案例",
+    ],
+  },
+  {
+    icon: TrendingUp,
+    tag: "增长期",
+    span: "3–12 个月",
+    points: [
+      "签约 KOC 500 → 2,000(独家 ≥ 200)",
+      "合作制作方 20 → 100 家",
+      "月交易额 ¥10 万 → ¥100 万",
+      "接入 ≥ 1 家大厂生态(红果 / 抖音)",
+    ],
+  },
+  {
+    icon: Crown,
+    tag: "规模化期",
+    span: "12–36 个月",
+    points: [
+      "签约 KOC 2,000 → 10,000+(独家 ≥ 1,000)",
+      "合作制作方 100 → 500 家",
+      "年交易额 ¥1,000 万 → ¥1 亿+",
+      "平台抽成后年收入 ¥200 万 → ¥2,000 万+",
+    ],
+  },
+];
+
+const CHANNELS = [
+  { name: "小红书 / 抖音私信", how: "筛选 10 万级生活 / 颜值 / 剧情类博主,定向私信邀约", cvr: "5–10%", cost: "极低(人工)" },
+  { name: "现有粉丝矩阵转化", how: "盘活自有 5,000 万粉丝矩阵(创小鸣 / 感阅等 KOC)", cvr: "10–20%", cost: "极低" },
+  { name: "MCN 合作", how: "与中小 MCN(主营短剧 KOC)签分成协议,批量签约", cvr: "批量", cost: "分成模式" },
+  { name: "社群裂变", how: "已签约 KOC 推荐新 KOC,双方各得 ¥50 奖励", cvr: "15–25%", cost: "¥50 / 新用户" },
+];
+
+const SCENES = [
+  { icon: Megaphone, title: "品牌 TVC / 信息流广告", desc: "与 4A 广告公司、品牌方直接合作,提供「品牌 AI 代言脸」服务。", inc: "SAM +15–30 亿" },
+  { icon: Star, title: "虚拟主播 / 直播", desc: "与直播公会合作,提供「AI 虚拟脸 + 直播脚本」方案。", inc: "新增长曲线" },
+  { icon: Zap, title: "游戏 NPC", desc: "与中小游戏工作室合作,提供可复用的角色脸模。", inc: "探索期" },
+  { icon: Network, title: "出海(东南亚短剧)", desc: "复制国内模式,签约东南亚 KOC,服务当地短剧制作方。", inc: "长期战略" },
+];
+
 export default function MarketPage() {
   return (
     <>
@@ -225,6 +275,81 @@ export default function MarketPage() {
               </div>
             </div>
           ))}
+        </div>
+      </Section>
+
+      <Section
+        eyebrow="运营规划"
+        title="先供给后需求 · 三阶段把闭环跑大"
+        subtitle="核心原则:先供给后需求,先人工后系统,先私域后公域,先配角后主角。"
+      >
+        <div className="grid gap-4 md:grid-cols-3">
+          {GROWTH_PHASES.map((p) => (
+            <div key={p.tag} className="glass rounded-[14px] p-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-brand-soft text-brand">
+                  <p.icon size={18} />
+                </span>
+                <span className="text-[12px] text-ink-3">{p.span}</span>
+              </div>
+              <div className="text-[16px] font-semibold text-ink mb-3">{p.tag}</div>
+              <ul className="grid gap-2">
+                {p.points.map((pt) => (
+                  <li key={pt} className="flex gap-2 text-[13px] leading-6 text-ink-2">
+                    <span className="mt-[9px] h-1 w-1 shrink-0 rounded-full bg-brand-2" />
+                    {pt}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-10">
+          <div className="text-[12px] uppercase tracking-widest text-ink-3 mb-4">三阶段渠道策略</div>
+          <div className="overflow-x-auto glass rounded-[14px]">
+            <table className="w-full min-w-[600px] text-[14px]">
+              <thead className="text-left text-ink-3 text-[12px] uppercase tracking-widest">
+                <tr className="border-b border-line">
+                  <th className="px-5 py-3 font-medium">渠道</th>
+                  <th className="px-5 py-3 font-medium">方法</th>
+                  <th className="px-5 py-3 font-medium">预估转化</th>
+                  <th className="px-5 py-3 font-medium">成本</th>
+                </tr>
+              </thead>
+              <tbody>
+                {CHANNELS.map((c) => (
+                  <tr key={c.name} className="border-b border-line last:border-0">
+                    <td className="px-5 py-3 text-ink whitespace-nowrap">{c.name}</td>
+                    <td className="px-5 py-3 text-ink-2">{c.how}</td>
+                    <td className="px-5 py-3 text-ink-2 whitespace-nowrap">{c.cvr}</td>
+                    <td className="px-5 py-3 text-ink-3 whitespace-nowrap">{c.cost}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="mt-10">
+          <div className="text-[12px] uppercase tracking-widest text-ink-3 mb-1">多场景拓展</div>
+          <p className="text-[13.5px] leading-6 text-ink-3 mb-4">
+            从「短剧授权」走向「全场景 AI 人脸授权服务平台」。
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {SCENES.map((s) => (
+              <div key={s.title} className="glass rounded-[14px] p-6">
+                <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-md bg-brand-soft text-brand">
+                  <s.icon size={18} />
+                </div>
+                <div className="text-[14.5px] font-semibold text-ink mb-1.5">{s.title}</div>
+                <p className="text-[13px] leading-6 text-ink-3 mb-3">{s.desc}</p>
+                <span className="inline-block rounded-md bg-brand-soft px-2 py-0.5 text-[12px] text-brand">
+                  {s.inc}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </Section>
 

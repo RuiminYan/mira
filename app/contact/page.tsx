@@ -60,6 +60,22 @@ export default function ContactPage() {
           />
         </div>
       </Section>
+
+      <Section align="center">
+        <div className="glass rounded-[16px] p-8 md:p-10 text-center">
+          <p className="text-[19px] md:text-[24px] font-semibold text-gradient mb-6">
+            照亮每一处值得被看见的叙事
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-x-10 gap-y-2 text-[14.5px]">
+            <div className="text-ink-2">
+              联系人 <span className="text-ink font-medium">温雨涵</span>
+            </div>
+            <div className="text-ink-2">
+              微信 <span className="text-ink font-medium">EulaWen2020</span>
+            </div>
+          </div>
+        </div>
+      </Section>
     </>
   );
 }

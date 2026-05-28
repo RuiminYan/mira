@@ -119,6 +119,29 @@ const TODO_SCALE = [
   { title: "安全与合规加固", desc: "压力测试、数据备份、隐私与等保合规审计。" },
 ];
 
+const DELIVERED: { phase: string; tag: string; items: string[] }[] = [
+  {
+    phase: "跑通真实闭环",
+    tag: "P0",
+    items: ["实名认证 + 形象上传", "电子合同 + 链上存证", "支付 + 自动对账"],
+  },
+  {
+    phase: "提升成交效率",
+    tag: "P1",
+    items: ["AI 演员预览片", "套餐 SKU + 在线议价", "图搜脸 / 标签近似", "消息中心"],
+  },
+  {
+    phase: "商业深化",
+    tag: "P2",
+    items: ["创作者数据驾驶舱", "MCN / 经纪人后台", "行业洞察专栏 /insights", "大厂渠道分发"],
+  },
+  {
+    phase: "平台化与出海",
+    tag: "P3",
+    items: ["中英双语", "形象资产 NFT 化", "AI 生成工坊入口"],
+  },
+];
+
 export default function ProgressPage() {
   return (
     <>
@@ -281,6 +304,38 @@ export default function ProgressPage() {
         subtitle="从打通最核心的业务闭环,到具备对外公开发布的条件,平台是分阶段、踏实搭起来的。"
       >
         <Timeline />
+      </Section>
+
+      {/* 路线图交付清单:P0–P3 */}
+      <Section
+        eyebrow="路线图交付"
+        title={
+          <>
+            规划的 P0–P3,<span className="text-gradient">已全部落地</span>
+          </>
+        }
+        subtitle="从跑通闭环到平台化出海,四个阶段共 14 项核心能力均已实现,并可在线逐一体验。"
+      >
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {DELIVERED.map((g) => (
+            <div key={g.tag} className="glass rounded-[14px] p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="inline-flex items-center justify-center rounded-md bg-brand-soft px-2 py-0.5 text-[12px] font-semibold text-brand">
+                  {g.tag}
+                </span>
+                <span className="text-[14px] font-semibold text-ink">{g.phase}</span>
+              </div>
+              <ul className="space-y-2.5">
+                {g.items.map((it) => (
+                  <li key={it} className="flex gap-2 text-[13px] leading-6 text-ink-2">
+                    <CheckCircle2 size={15} className="text-brand-2 shrink-0 mt-1" />
+                    {it}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
       </Section>
 
       {/* 下一步:还需要做什么 */}
