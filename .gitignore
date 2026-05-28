@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+dist/
+.env.local
+.env*.local
+.env
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+.tmp/
+.playwright-mcp/
+
+# SQLite runtime DB (regenerate with: pnpm tsx db/seed.ts)
+data.db
+data.db-shm
+data.db-wal

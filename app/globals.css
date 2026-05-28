@@ -1,0 +1,220 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #6E59F6;
+  --color-brand-2: #FF6FB4;
+  --color-brand-dark: #4F3DD8;
+  --color-brand-soft: var(--c-brand-soft);
+
+  --color-bg: var(--c-bg);
+  --color-bg-2: var(--c-bg-2);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-line: var(--c-line);
+  --color-line-2: var(--c-line-2);
+
+  --color-ink: var(--c-ink);
+  --color-ink-2: var(--c-ink-2);
+  --color-ink-3: var(--c-ink-3);
+  --color-ink-4: var(--c-ink-4);
+
+  --color-success: #10B981;
+  --color-warn: #F59E0B;
+  --color-danger: #EF4444;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+
+  --radius-card: 14px;
+}
+
+:root {
+  color-scheme: light;
+  --c-brand-soft: rgba(110, 89, 246, 0.10);
+  --c-bg: #FFFFFF;
+  --c-bg-2: #F8F8FC;
+  --c-surface: #FFFFFF;
+  --c-surface-2: #F4F4FA;
+  --c-line: rgba(15, 15, 35, 0.08);
+  --c-line-2: rgba(15, 15, 35, 0.14);
+  --c-ink: #15172A;
+  --c-ink-2: #3A3E58;
+  --c-ink-3: #6A6F87;
+  --c-ink-4: #9499B5;
+
+  --bg-aura: radial-gradient(70% 50% at 50% -10%, rgba(110, 89, 246, 0.10), transparent 60%),
+             radial-gradient(60% 40% at 95% 5%, rgba(255, 111, 180, 0.07), transparent 60%);
+  --grid-color: rgba(15, 15, 35, 0.05);
+  --glass-bg: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.65));
+  --glass-border: rgba(15, 15, 35, 0.08);
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 30px -15px rgba(15, 23, 42, 0.10);
+}
+
+.dark {
+  color-scheme: dark;
+  --c-brand-soft: rgba(110, 89, 246, 0.18);
+  --c-bg: #0A0A14;
+  --c-bg-2: #0F0F1E;
+  --c-surface: #14142A;
+  --c-surface-2: #1B1B33;
+  --c-line: rgba(255, 255, 255, 0.08);
+  --c-line-2: rgba(255, 255, 255, 0.14);
+  --c-ink: #F4F4FB;
+  --c-ink-2: #C5C6E0;
+  --c-ink-3: #8A8BAD;
+  --c-ink-4: #5C5D7C;
+
+  --bg-aura: radial-gradient(80% 50% at 50% -10%, rgba(110, 89, 246, 0.22), transparent 60%),
+             radial-gradient(60% 40% at 90% 10%, rgba(255, 111, 180, 0.12), transparent 60%);
+  --grid-color: rgba(255, 255, 255, 0.04);
+  --glass-bg: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 14px 36px -16px rgba(110, 89, 246, 0.35);
+}
+
+@layer base {
+  html, body {
+    background: var(--c-bg);
+    color: var(--c-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-image: var(--bg-aura);
+    background-attachment: fixed;
+  }
+
+  a { color: inherit; }
+  ::selection { background: rgba(110, 89, 246, 0.35); color: var(--c-ink); }
+}
+
+@layer base {
+  *:focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 100;
+    padding: 8px 16px;
+    background: var(--c-surface);
+    color: var(--c-ink);
+    border: 1px solid var(--c-line-2);
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  .skip-link:focus {
+    left: 16px;
+    top: 12px;
+  }
+  /* a11y prefs */
+  html[data-a11y-large-font] body { font-size: 17px; line-height: 1.65; }
+  html[data-a11y-high-contrast] {
+    --c-ink: #000000;
+    --c-ink-2: #15172A;
+    --c-line: rgba(15, 15, 35, 0.35);
+    --c-line-2: rgba(15, 15, 35, 0.55);
+  }
+  html.dark[data-a11y-high-contrast] {
+    --c-ink: #ffffff;
+    --c-ink-2: #ffffff;
+    --c-line: rgba(255, 255, 255, 0.45);
+    --c-line-2: rgba(255, 255, 255, 0.7);
+  }
+  html[data-a11y-reduce-motion] *,
+  html[data-a11y-reduce-motion] *::before,
+  html[data-a11y-reduce-motion] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+  .container-page {
+    margin-inline: auto;
+    max-width: 1200px;
+    padding-inline: clamp(16px, 4vw, 32px);
+  }
+  .text-balance { text-wrap: balance; }
+
+  .text-gradient {
+    background: linear-gradient(90deg, #6E59F6 0%, #FF6FB4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .dark .text-gradient {
+    background: linear-gradient(90deg, #B9A8FF 0%, #FF6FB4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .glass {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(8px);
+  }
+
+  .glow-ring {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+      0 20px 60px -30px rgba(110, 89, 246, 0.45),
+      0 8px 30px -15px rgba(255, 111, 180, 0.25);
+  }
+
+  .grid-bg {
+    background-image:
+      linear-gradient(var(--grid-color) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 1; }
+  }
+  .anim-pulse-soft { animation: pulse-soft 3.2s ease-in-out infinite; }
+
+  @keyframes float-y {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .anim-float { animation: float-y 5s ease-in-out infinite; }
+
+  @keyframes marquee-x {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .anim-marquee { animation: marquee-x 40s linear infinite; }
+
+  @keyframes scroll-y {
+    from { transform: translateY(0); }
+    to { transform: translateY(-50%); }
+  }
+  .anim-scroll-y { animation: scroll-y 45s linear infinite; }
+}
