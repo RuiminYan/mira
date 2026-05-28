@@ -1,0 +1,153 @@
+# 部署 Mira 到 mira.cuberoot.me (云服务器 systemd mira-next,:3003)。
+# 服务器内存吃紧 + 拉不到 GitHub,所以 build 在 CI 跑,scp standalone 产物过去。
+# better-sqlite3 是原生模块,CI 必须用与服务器相同的 Node 大版本 (24),否则 ABI 不匹配加载失败。
+# 演示库在 CI 里 migrate+seed 成 seed-data.db 一起打包;服务器仅在 /var/lib/mira/data.db
+# 不存在时拷入 (持久 DB 不随重新部署被覆盖)。
+name: Deploy Mira
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - '.tmp/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Next standalone
+        env:
+          NODE_ENV: production
+        run: pnpm build
+
+      # 在 CI 里造出 seed 好的演示库,作为初次部署的初始 DB 一起 scp 过去。
+      - name: Seed demo database
+        env:
+          MIRA_DB_PATH: ./seed-data.db
+        run: |
+          pnpm db:migrate
+          pnpm db:seed
+          # WAL checkpoint,让单个 .db 文件自包含 (无需带 -wal/-shm 边车)
+          node -e "const D=require('better-sqlite3');const d=new D(process.env.MIRA_DB_PATH);d.pragma('wal_checkpoint(TRUNCATE)');d.close()"
+          ls -lh seed-data.db
+
+      # output:standalone 把入口产到 .next/standalone/server.js (非 monorepo,无嵌套)。
+      # static/ + public/ 必须手动拷进 standalone 树 (Next 文档要求)。
+      - name: Assemble deploy bundle
+        run: |
+          ENTRY=.next/standalone
+          test -f "$ENTRY/server.js" || { echo "ERROR: $ENTRY/server.js missing"; find .next/standalone -name server.js; exit 1; }
+          mkdir -p "$ENTRY/.next"
+          cp -r .next/static "$ENTRY/.next/static"
+          [ -d public ] && cp -r public "$ENTRY/public"
+          cp seed-data.db "$ENTRY/seed-data.db"
+          # systemd 调用的 wrapper:定位最新 nvm Node 再起 server.js (服务器 node 仅在 nvm 下)
+          cat > "$ENTRY/start.sh" <<'EOF'
+          #!/bin/sh
+          cd "$(dirname "$0")"
+          NODE_DIR="$(ls -d /root/.nvm/versions/node/v* 2>/dev/null | sort -V | tail -1)"
+          if [ -z "$NODE_DIR" ] || [ ! -x "$NODE_DIR/bin/node" ]; then
+            echo "ERROR: no node binary under /root/.nvm/versions/node/v*" >&2
+            exit 1
+          fi
+          exec "$NODE_DIR/bin/node" server.js
+          EOF
+          chmod +x "$ENTRY/start.sh"
+          tar -czf /tmp/mira.tar.gz -C "$ENTRY" .
+          ls -lh /tmp/mira.tar.gz
+
+      - name: Setup SSH
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id
+          chmod 600 ~/.ssh/id
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: scp bundle + systemd unit
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          scp -i ~/.ssh/id /tmp/mira.tar.gz "$DEPLOY_USER@$DEPLOY_HOST:/tmp/mira.tar.gz"
+          scp -i ~/.ssh/id ops/mira-next.service "$DEPLOY_USER@$DEPLOY_HOST:/tmp/mira-next.service"
+
+      # 服务器侧原子替换 + 健康检查 + 失败回滚 (镜像 cuberoot-next 的 deploy_next.yml)。
+      - name: Deploy + restart
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          ssh -i ~/.ssh/id "$DEPLOY_USER@$DEPLOY_HOST" bash -s <<'REMOTE'
+          set -e
+          LIVE=/www/wwwroot/mira
+          STAGE=/www/wwwroot/mira.new
+          TS=$(date +%s)
+          BACKUP=/www/wwwroot/mira.bak-$TS
+
+          rm -rf "$STAGE"; mkdir -p "$STAGE"
+          tar -xzf /tmp/mira.tar.gz -C "$STAGE"
+          rm -f /tmp/mira.tar.gz
+          [ -x "$STAGE/start.sh" ] || { echo "ERROR: start.sh missing"; exit 1; }
+          [ -f "$STAGE/server.js" ] || { echo "ERROR: server.js missing"; exit 1; }
+
+          # 持久 DB 放在部署目录之外;仅首次 (库不存在) 灌入种子,重新部署不覆盖
+          mkdir -p /var/lib/mira
+          if [ ! -f /var/lib/mira/data.db ]; then
+            cp "$STAGE/seed-data.db" /var/lib/mira/data.db
+            echo "seeded /var/lib/mira/data.db from bundle"
+          fi
+
+          if [ -d "$LIVE" ]; then
+            find /www/wwwroot -maxdepth 1 -name 'mira.bak-*' -exec rm -rf {} +
+            mv "$LIVE" "$BACKUP"
+          fi
+          mv "$STAGE" "$LIVE"
+
+          UNIT=/etc/systemd/system/mira-next.service
+          if ! cmp -s /tmp/mira-next.service "$UNIT"; then
+            cp /tmp/mira-next.service "$UNIT"
+            systemctl daemon-reload
+            echo "systemd unit updated"
+          fi
+          rm -f /tmp/mira-next.service
+          systemctl enable mira-next >/dev/null 2>&1 || true
+          systemctl restart mira-next
+
+          # 健康检查:最多等 15s,:3003 返回 <500 即视为起来了
+          for i in $(seq 1 15); do
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3003/ 2>/dev/null || true)
+            if [ -n "$CODE" ] && [ "$CODE" -ge 200 ] && [ "$CODE" -lt 500 ]; then
+              echo "OK: mira-next responding on :3003 (HTTP $CODE)"
+              exit 0
+            fi
+            sleep 1
+          done
+
+          echo "ERROR: mira-next did not respond on :3003 within 15s"
+          journalctl -u mira-next --no-pager -n 40 || true
+          if [ -d "$BACKUP" ]; then
+            echo "rolling back..."
+            rm -rf "$LIVE"; mv "$BACKUP" "$LIVE"
+            systemctl restart mira-next
+          fi
+          exit 1
+          REMOTE

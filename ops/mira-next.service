@@ -1,0 +1,17 @@
+[Unit]
+Description=Mira 镜界 (Next standalone)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/www/wwwroot/mira
+Environment=NODE_ENV=production
+Environment=PORT=3003
+Environment=HOSTNAME=127.0.0.1
+Environment=MIRA_DB_PATH=/var/lib/mira/data.db
+ExecStart=/www/wwwroot/mira/start.sh
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
