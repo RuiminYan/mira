@@ -87,14 +87,7 @@ export default async function HomePage() {
   const platformChain =
     db.get<{ c: number }>(sql`SELECT COUNT(*) as c FROM chain_records`)?.c ?? 0;
 
-  const TRUSTED = [
-    { name: "段和段律所", tone: "from-indigo-500/30 to-indigo-500/5" },
-    { name: "上海仲裁委", tone: "from-sky-500/30 to-sky-500/5" },
-    { name: "蚂蚁链", tone: "from-cyan-500/30 to-cyan-500/5" },
-    { name: "红果短剧", tone: "from-pink-500/30 to-pink-500/5" },
-    { name: "星河短剧工作室", tone: "from-amber-500/30 to-amber-500/5" },
-    { name: "寒拾文化 MCN", tone: "from-purple-500/30 to-purple-500/5" },
-  ];
+  const TRUSTED = ["段和段律所", "上海仲裁委", "蚂蚁链", "红果短剧", "星河短剧工作室", "寒拾文化 MCN"];
 
   const insights = featuredArticles(3);
 
@@ -118,15 +111,12 @@ export default async function HomePage() {
             {locale === "en" ? "Trusted by" : "合作 ・ 信任伙伴"}
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-            {TRUSTED.map((p) => (
+            {TRUSTED.map((name) => (
               <div
-                key={p.name}
-                className={
-                  "rounded-md px-3 py-3 text-center text-[12.5px] text-ink-2 bg-gradient-to-br " +
-                  p.tone
-                }
+                key={name}
+                className="px-3 py-3 text-center text-[12.5px] text-ink-3"
               >
-                {p.name}
+                {name}
               </div>
             ))}
           </div>
