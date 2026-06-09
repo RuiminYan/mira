@@ -1,8 +1,14 @@
 import Link from "next/link";
 import { Section } from "@/components/Section";
 import { globalSearch, type SearchScope } from "@/lib/search";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "搜索" };
+
+const loadSearch = createLoader({
+  q: parseAsString,
+  tab: parseAsString,
+});
 
 const TABS: { key: string; label: string; scope?: SearchScope }[] = [
   { key: "all", label: "全部" },
@@ -16,9 +22,9 @@ const TABS: { key: string; label: string; scope?: SearchScope }[] = [
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; tab?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const q = (sp.q ?? "").slice(0, 80);
   const tab = sp.tab ?? "all";
   const scopes: SearchScope[] | undefined =

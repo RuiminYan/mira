@@ -4,18 +4,23 @@ import { getCurrentUser } from "@/lib/auth";
 import { DashboardShell } from "@/components/DashboardLayout";
 import { PARTNER_NAV as NAV } from "@/lib/nav";
 import { createOrganization } from "@/app/actions/orgs";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "新建团队" };
+
+const loadSearch = createLoader({
+  err: parseAsString,
+});
 
 export default async function NewOrgPage({
   searchParams,
 }: {
-  searchParams: Promise<{ err?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?role=partner&next=/partner/org/new");
   if (u.role !== "partner" && u.role !== "admin") redirect("/");
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
 
   return (
     <DashboardShell role={`制作方 · ${u.nickname}`} nav={NAV}>

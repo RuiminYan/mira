@@ -5,16 +5,24 @@ import { Fingerprint, CheckCircle2, XCircle } from "lucide-react";
 import { db, schema } from "@/db";
 import { getCurrentUser } from "@/lib/auth";
 import { verifyFingerprint } from "@/app/actions/messages";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "指纹校验" };
 
-type Search = Promise<{ fp?: string; err?: string }>;
+const loadSearch = createLoader({
+  fp: parseAsString,
+  err: parseAsString,
+});
 
-export default async function VerifyPage({ searchParams }: { searchParams: Search }) {
+export default async function VerifyPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?next=/verify");
 
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const fp = (sp.fp ?? "").trim().toLowerCase();
 
   let match: {

@@ -6,8 +6,13 @@ import { getCurrentUser } from "@/lib/auth";
 import { DashboardShell, PanelTitle } from "@/components/DashboardLayout";
 import { ADMIN_NAV as NAV } from "@/lib/nav";
 import { recordCsmTouch, updateCsmAssignment } from "@/app/actions/csm";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "客户 360 视图" };
+
+const loadSearch = createLoader({
+  ok: parseAsString,
+});
 
 const TIER_OPTIONS: { value: "vip" | "standard" | "inactive"; label: string }[] = [
   { value: "vip", label: "VIP" },
@@ -20,13 +25,13 @@ export default async function CsmDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ ok?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?role=admin&next=/admin/csm");
   if (u.role !== "admin") redirect("/");
   const p = await params;
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
 
   const a = db.select().from(schema.csmAssignments).where(eq(schema.csmAssignments.id, Number(p.id))).get();
   if (!a) notFound();

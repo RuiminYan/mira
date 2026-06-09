@@ -5,8 +5,11 @@ import { Wallet, ArrowUpRight, ArrowDownRight, Plus, Download } from "lucide-rea
 import { db, schema } from "@/db";
 import { getCurrentUser } from "@/lib/auth";
 import { getOrCreateWallet, fenToYuan, txnKindLabel, type WalletTxnKind } from "@/lib/wallet";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "我的钱包" };
+
+const loadSearch = createLoader({ ok: parseAsString });
 
 const KIND_TONE: Record<string, string> = {
   recharge: "bg-emerald-500/15 text-emerald-300",
@@ -21,11 +24,11 @@ const KIND_TONE: Record<string, string> = {
 export default async function WalletPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ok?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?next=/wallet");
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const wallet = getOrCreateWallet(u.id);
   const txns = db
     .select()

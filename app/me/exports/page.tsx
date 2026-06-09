@@ -3,8 +3,11 @@ import { desc, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { getCurrentUser } from "@/lib/auth";
 import { createExport } from "@/app/actions/exports";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "数据导出" };
+
+const loadSearch = createLoader({ ok: parseAsString });
 
 const KIND_LABEL: Record<string, string> = {
   gdpr_all: "全部账户数据 (GDPR · JSON)",
@@ -17,11 +20,11 @@ const KIND_LABEL: Record<string, string> = {
 export default async function MyExportsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ok?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?next=/me/exports");
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
 
   const jobs = db
     .select()

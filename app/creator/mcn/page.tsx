@@ -5,8 +5,13 @@ import { getCurrentUser } from "@/lib/auth";
 import { DashboardShell, PanelTitle } from "@/components/DashboardLayout";
 import { CREATOR_NAV as NAV } from "@/lib/nav";
 import { respondMCNInvite } from "@/app/actions/mcn";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "我的经纪人" };
+
+const loadSearch = createLoader({
+  ok: parseAsString,
+});
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "待回复",
@@ -15,10 +20,12 @@ const STATUS_LABEL: Record<string, string> = {
   rejected: "已拒绝",
 };
 
-type Search = Promise<{ ok?: string }>;
-
-export default async function CreatorMCN({ searchParams }: { searchParams: Search }) {
-  const sp = await searchParams;
+export default async function CreatorMCN({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await loadSearch(searchParams);
   const u = await getCurrentUser();
   if (!u) redirect("/login?role=creator&next=/creator/mcn");
   if (u.role !== "creator" && u.role !== "admin") redirect("/");

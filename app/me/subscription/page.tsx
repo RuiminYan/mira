@@ -3,17 +3,20 @@ import { desc, eq, sql, and, gte } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { getCurrentUser } from "@/lib/auth";
 import { changeSubscription, cancelSubscription } from "@/app/actions/plans";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "我的订阅" };
+
+const loadSearch = createLoader({ ok: parseAsString, upgrade: parseAsString });
 
 export default async function MySubscriptionPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ok?: string; upgrade?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?next=/me/subscription");
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
 
   const sub = db
     .select({ s: schema.subscriptions, p: schema.plans })

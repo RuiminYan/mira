@@ -4,10 +4,13 @@ import { DashboardShell, PanelTitle, StatTile } from "@/components/DashboardLayo
 import { ADMIN_NAV } from "@/lib/nav";
 import { countDeliveryStatuses, recentDeliveries } from "@/lib/webhookQueue";
 import { triggerWebhookTick } from "./actions";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "Webhook 重试队列" };
 
-type Search = Promise<{ ok?: string }>;
+const loadSearch = createLoader({
+  ok: parseAsString,
+});
 
 const STATUS_TONE: Record<string, string> = {
   ok: "bg-emerald-500/15 text-emerald-300",
@@ -24,12 +27,16 @@ function relTime(epochSec: number): string {
   return `${Math.round(diff / 86400)} 天后`;
 }
 
-export default async function WebhookQueuePage({ searchParams }: { searchParams: Search }) {
+export default async function WebhookQueuePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const me = await getCurrentUser();
   if (!me) redirect("/login?role=admin&next=/admin/webhooks/queue");
   if (me.role !== "admin") redirect("/");
 
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const stats = countDeliveryStatuses();
   const rows = recentDeliveries(30);
 

@@ -5,8 +5,13 @@ import { db, schema } from "@/db";
 import { getCurrentUser } from "@/lib/auth";
 import { DashboardShell } from "@/components/DashboardLayout";
 import { CheckCircle2 } from "lucide-react";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "我的订单" };
+
+const loadSearch = createLoader({
+  ok: parseAsString,
+});
 
 const NAV = [
   { href: "/partner", label: "概览" },
@@ -36,10 +41,12 @@ const STATUS_TONE: Record<string, string> = {
   cancelled: "bg-white/[0.08] text-ink-2",
 };
 
-type Search = Promise<{ ok?: string }>;
-
-export default async function PartnerOrders({ searchParams }: { searchParams: Search }) {
-  const sp = await searchParams;
+export default async function PartnerOrders({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await loadSearch(searchParams);
   const u = await getCurrentUser();
   if (!u) redirect("/login?role=partner&next=/partner/orders");
   if (u.role !== "partner" && u.role !== "admin") redirect("/");

@@ -3,10 +3,13 @@ import { getCurrentUser } from "@/lib/auth";
 import { DashboardShell, PanelTitle } from "@/components/DashboardLayout";
 import { MCN_NAV as NAV } from "@/lib/nav";
 import { inviteCreatorToMCN } from "@/app/actions/mcn";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "邀请创作者" };
 
-type Search = Promise<{ err?: string }>;
+const loadSearch = createLoader({
+  err: parseAsString,
+});
 
 const ERR_MAP: Record<string, string> = {
   email: "请填写邮箱",
@@ -14,8 +17,12 @@ const ERR_MAP: Record<string, string> = {
   role: "该用户不是创作者身份",
 };
 
-export default async function InviteCreatorPage({ searchParams }: { searchParams: Search }) {
-  const sp = await searchParams;
+export default async function InviteCreatorPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await loadSearch(searchParams);
   const u = await getCurrentUser();
   if (!u) redirect("/login?role=mcn&next=/mcn/creators/invite");
   if (u.role !== "mcn" && u.role !== "admin") redirect("/");

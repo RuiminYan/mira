@@ -2,17 +2,20 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getA11y } from "@/lib/a11y";
 import { saveA11yAction } from "@/app/actions/a11y";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "无障碍设置" };
+
+const loadSearch = createLoader({ ok: parseAsString });
 
 export default async function AccessibilityPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ok?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?next=/me/accessibility");
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const prefs = await getA11y();
 
   return (

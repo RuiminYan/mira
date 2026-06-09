@@ -7,10 +7,15 @@ import { getCurrentUser } from "@/lib/auth";
 import { openDispute, requestInvoice } from "@/app/actions/orders";
 import { pushDistribution } from "@/app/actions/distributions";
 import { ReviewBlock } from "@/components/ReviewBlock";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "订单详情" };
 
-type Search = Promise<{ ok?: string; err?: string; paid?: string }>;
+const loadSearch = createLoader({
+  ok: parseAsString,
+  err: parseAsString,
+  paid: parseAsString,
+});
 
 const CHANNELS = [
   { key: "hongguo", label: "红果短剧", Icon: Tv, color: "text-red-300" },
@@ -58,10 +63,10 @@ export default async function PartnerOrderDetail({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Search;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const p = await params;
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const id = Number(p.id);
 
   const u = await getCurrentUser();

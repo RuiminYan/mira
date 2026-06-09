@@ -5,17 +5,20 @@ import { getCurrentUser } from "@/lib/auth";
 import { getAchievements } from "@/lib/achievements";
 import { rarityTone } from "@/lib/badges";
 import { pinBadge } from "@/app/actions/badges";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "我的徽章" };
+
+const loadSearch = createLoader({ ok: parseAsString });
 
 export default async function MyBadgesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ok?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?next=/me/badges");
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
 
   const rows = db
     .select({ ub: schema.userBadges, b: schema.badges })

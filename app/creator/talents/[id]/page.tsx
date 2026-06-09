@@ -7,10 +7,14 @@ import { getCurrentUser } from "@/lib/auth";
 import { DashboardShell, PanelTitle } from "@/components/DashboardLayout";
 import { requestTakedown } from "@/app/actions/talents";
 import { CREATOR_NAV as NAV } from "@/lib/nav";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "形象管理" };
 
-type Search = Promise<{ ok?: string; err?: string }>;
+const loadSearch = createLoader({
+  ok: parseAsString,
+  err: parseAsString,
+});
 
 const STATUS_LABEL: Record<string, string> = {
   draft: "草稿",
@@ -30,10 +34,10 @@ export default async function CreatorTalentDetail({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Search;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const p = await params;
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const id = Number(p.id);
 
   const u = await getCurrentUser();

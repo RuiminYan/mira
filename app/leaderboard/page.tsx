@@ -3,6 +3,7 @@ import { eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { Section } from "@/components/Section";
 import { fetchBoard, listPeriods, LB_LABEL, currentPeriod, type LbKind } from "@/lib/leaderboard";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = {
   title: "排行榜",
@@ -11,12 +12,17 @@ export const metadata = {
 
 const KINDS: LbKind[] = ["creator_revenue", "partner_spend", "talent_orders"];
 
+const loadSearch = createLoader({
+  period: parseAsString,
+  kind: parseAsString,
+});
+
 export default async function LeaderboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ period?: string; kind?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const period = sp.period || currentPeriod();
   const kind = (KINDS as string[]).includes(sp.kind ?? "") ? (sp.kind as LbKind) : "creator_revenue";
   const board = fetchBoard(period, kind);

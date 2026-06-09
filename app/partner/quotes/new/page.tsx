@@ -5,8 +5,15 @@ import { db, schema } from "@/db";
 import { getCurrentUser } from "@/lib/auth";
 import { createQuote } from "@/app/actions/bundles";
 import { DashboardShell } from "@/components/DashboardLayout";
+import { createLoader, parseAsString, parseAsInteger } from "nuqs/server";
 
 export const metadata = { title: "发起议价" };
+
+const loadSearch = createLoader({
+  talentId: parseAsInteger,
+  bundleId: parseAsInteger,
+  err: parseAsString,
+});
 
 const NAV = [
   { href: "/partner", label: "概览" },
@@ -15,16 +22,18 @@ const NAV = [
   { href: "/marketplace", label: "选角广场 →" },
 ];
 
-type Search = Promise<{ talentId?: string; bundleId?: string; err?: string }>;
-
-export default async function NewQuotePage({ searchParams }: { searchParams: Search }) {
+export default async function NewQuotePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?role=partner&next=/partner/quotes/new");
   if (u.role !== "partner" && u.role !== "admin") redirect("/");
 
-  const sp = await searchParams;
-  const talentId = sp.talentId ? Number(sp.talentId) : null;
-  const bundleId = sp.bundleId ? Number(sp.bundleId) : null;
+  const sp = await loadSearch(searchParams);
+  const talentId = sp.talentId;
+  const bundleId = sp.bundleId;
 
   const talent = talentId
     ? db.select().from(schema.talents).where(eq(schema.talents.id, talentId)).get()

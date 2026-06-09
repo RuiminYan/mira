@@ -5,6 +5,7 @@ import { Layers, MessageCircle, ShieldCheck } from "lucide-react";
 import { db, schema } from "@/db";
 import { getCurrentUser } from "@/lib/auth";
 import { placeBundleOrder } from "@/app/actions/bundles";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const p = await params;
@@ -12,17 +13,19 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return { title: b ? b.name : "套餐" };
 }
 
-type Search = Promise<{ err?: string }>;
+const loadSearch = createLoader({
+  err: parseAsString,
+});
 
 export default async function BundleDetail({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Search;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const p = await params;
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const id = Number(p.id);
   const b = db.select().from(schema.bundles).where(eq(schema.bundles.id, id)).get();
   if (!b) notFound();

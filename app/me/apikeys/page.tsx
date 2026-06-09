@@ -4,17 +4,20 @@ import { db, schema } from "@/db";
 import { getCurrentUser } from "@/lib/auth";
 import { ALL_SCOPES, SCOPE_LABEL, parseScopes } from "@/lib/apikey";
 import { createApiKey, revokeApiKey } from "@/app/actions/apikeys";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "我的 API Key" };
+
+const loadSearch = createLoader({ new: parseAsString, ok: parseAsString, err: parseAsString });
 
 export default async function MyApiKeys({
   searchParams,
 }: {
-  searchParams: Promise<{ new?: string; ok?: string; err?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?next=/me/apikeys");
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
 
   const keys = db
     .select()

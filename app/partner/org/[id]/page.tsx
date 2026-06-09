@@ -6,20 +6,26 @@ import { getCurrentUser } from "@/lib/auth";
 import { DashboardShell, PanelTitle } from "@/components/DashboardLayout";
 import { PARTNER_NAV as NAV } from "@/lib/nav";
 import { inviteOrgMember } from "@/app/actions/orgs";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "团队工作台" };
+
+const loadSearch = createLoader({
+  ok: parseAsString,
+  err: parseAsString,
+});
 
 export default async function OrgPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ ok?: string; err?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?role=partner");
   const p = await params;
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const orgId = Number(p.id);
   const org = db.select().from(schema.organizations).where(eq(schema.organizations.id, orgId)).get();
   if (!org) notFound();

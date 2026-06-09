@@ -9,6 +9,7 @@ import {
   type ArticleCategory,
 } from "@/lib/insights";
 import { getLocale, t } from "@/lib/i18n";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -23,7 +24,10 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-type Search = Promise<{ cat?: string; tag?: string }>;
+const loadSearch = createLoader({
+  cat: parseAsString,
+  tag: parseAsString,
+});
 
 function catLabel(c: ArticleCategory, locale: "zh" | "en") {
   if (locale === "zh") return c;
@@ -40,10 +44,14 @@ function fmtDate(s: string): string {
   return s.replace(/-/g, ".");
 }
 
-export default async function InsightsHome({ searchParams }: { searchParams: Search }) {
+export default async function InsightsHome({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const locale = await getLocale();
   const tr = (k: string, v?: Record<string, string | number>) => t(k, locale, v);
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const cat =
     sp.cat && (ARTICLE_CATEGORIES as string[]).includes(sp.cat)
       ? (sp.cat as ArticleCategory)

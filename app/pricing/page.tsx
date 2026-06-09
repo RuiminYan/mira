@@ -3,6 +3,7 @@ import { desc, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { Section } from "@/components/Section";
 import { submitEnterpriseLead } from "@/app/actions/plans";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = {
   title: "定价方案",
@@ -31,12 +32,17 @@ const FAQS: { q: string; a: string }[] = [
   { q: "数据如何保护?", a: "全部业务数据加密静态存储,行权事件 (KYC / 合同 / 订单) 哈希上链,Enterprise 客户可申请私有化部署。" },
 ];
 
+const loadSearch = createLoader({
+  ok: parseAsString,
+  err: parseAsString,
+});
+
 export default async function PricingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ok?: string; err?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const plans = db
     .select()
     .from(schema.plans)

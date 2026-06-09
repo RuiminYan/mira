@@ -12,20 +12,25 @@ import {
   reorderShortlistItem,
   shareShortlist,
 } from "@/app/actions/favorites";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "选角清单详情" };
+
+const loadSearch = createLoader({
+  ok: parseAsString,
+});
 
 export default async function ShortlistDetailPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ ok?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?role=partner");
   const p = await params;
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const id = Number(p.id);
   const list = db
     .select()

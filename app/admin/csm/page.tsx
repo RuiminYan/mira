@@ -6,8 +6,15 @@ import { getCurrentUser } from "@/lib/auth";
 import { DashboardShell, PanelTitle } from "@/components/DashboardLayout";
 import { ADMIN_NAV as NAV } from "@/lib/nav";
 import { assignCsm } from "@/app/actions/orgs";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "客户成功" };
+
+const loadSearch = createLoader({
+  ok: parseAsString,
+  tier: parseAsString,
+  sort: parseAsString,
+});
 
 const TIER_LABEL: Record<string, string> = {
   vip: "VIP",
@@ -23,12 +30,12 @@ const TIER_TONE: Record<string, string> = {
 export default async function AdminCsmPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ok?: string; tier?: string; sort?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?role=admin&next=/admin/csm");
   if (u.role !== "admin") redirect("/");
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const tierFilter = sp.tier && ["vip", "standard", "inactive"].includes(sp.tier) ? sp.tier : null;
   const sort = sp.sort === "checkin" ? "checkin" : "recent";
 

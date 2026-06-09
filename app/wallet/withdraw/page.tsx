@@ -3,19 +3,22 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { getOrCreateWallet, fenToYuan } from "@/lib/wallet";
 import { submitWithdrawal } from "@/app/actions/wallet";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "提现申请" };
+
+const loadSearch = createLoader({ err: parseAsString });
 
 export default async function WithdrawPage({
   searchParams,
 }: {
-  searchParams: Promise<{ err?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?next=/wallet/withdraw");
   if (u.role !== "creator" && u.role !== "mcn" && u.role !== "admin")
     redirect("/wallet?err=role");
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const w = getOrCreateWallet(u.id);
 
   return (

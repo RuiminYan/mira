@@ -6,8 +6,14 @@ import { getCurrentUser } from "@/lib/auth";
 import { DashboardShell, PanelTitle } from "@/components/DashboardLayout";
 import { MCN_NAV as NAV } from "@/lib/nav";
 import { pauseMCNCreator } from "@/app/actions/mcn";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "旗下创作者" };
+
+const loadSearch = createLoader({
+  ok: parseAsString,
+  err: parseAsString,
+});
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "待回复",
@@ -22,10 +28,12 @@ const STATUS_TONE: Record<string, string> = {
   rejected: "bg-red-500/15 text-red-300",
 };
 
-type Search = Promise<{ ok?: string; err?: string }>;
-
-export default async function MCNCreators({ searchParams }: { searchParams: Search }) {
-  const sp = await searchParams;
+export default async function MCNCreators({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await loadSearch(searchParams);
   const u = await getCurrentUser();
   if (!u) redirect("/login?role=mcn&next=/mcn/creators");
   if (u.role !== "mcn" && u.role !== "admin") redirect("/");

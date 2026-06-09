@@ -4,6 +4,7 @@ import { Sparkles, Briefcase, Shield, Network } from "lucide-react";
 import { loginOrRegister, getCurrentUser } from "@/lib/auth";
 import { getLocale, t } from "@/lib/i18n";
 import { bindReferral } from "@/lib/referral";
+import { createLoader, parseAsString, parseAsStringEnum } from "nuqs/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -17,21 +18,23 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-type Search = Promise<{ role?: string; next?: string; ref?: string }>;
-
 type Role = "creator" | "partner" | "admin" | "mcn";
 
-export default async function LoginPage({ searchParams }: { searchParams: Search }) {
+const loadSearch = createLoader({
+  role: parseAsStringEnum<Role>(["creator", "partner", "admin", "mcn"]),
+  next: parseAsString,
+  ref: parseAsString,
+});
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const locale = await getLocale();
   const tr = (k: string, v?: Record<string, string | number>) => t(k, locale, v);
-  const sp = await searchParams;
-  const explicitRole: Role | null =
-    sp.role === "creator" ||
-    sp.role === "partner" ||
-    sp.role === "admin" ||
-    sp.role === "mcn"
-      ? (sp.role as Role)
-      : null;
+  const sp = await loadSearch(searchParams);
+  const explicitRole = sp.role;
   // 无 role 参数 = 中立"登录"入口(老用户回流),不强推任何身份
   const neutral = !explicitRole;
   const role: Role = explicitRole ?? "creator";

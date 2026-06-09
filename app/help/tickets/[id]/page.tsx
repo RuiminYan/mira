@@ -9,9 +9,15 @@ import {
   priorityLabel,
 } from "@/lib/tickets";
 import { replyTicket, verifyTicketAction } from "@/app/actions/tickets";
+import { createLoader, parseAsString } from "nuqs/server";
 
 type Params = Promise<{ id: string }>;
-type Search = Promise<{ token?: string; ok?: string; err?: string }>;
+
+const loadSearch = createLoader({
+  token: parseAsString,
+  ok: parseAsString,
+  err: parseAsString,
+});
 
 export const metadata = { title: "工单详情" };
 
@@ -20,10 +26,10 @@ export default async function MyTicketDetail({
   searchParams,
 }: {
   params: Params;
-  searchParams: Search;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const p = await params;
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const me = await getCurrentUser();
   const id = Number(p.id);
   const t = getTicket(id);

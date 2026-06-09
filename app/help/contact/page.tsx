@@ -8,18 +8,27 @@ import {
   priorityLabel,
   type TicketPriority,
 } from "@/lib/tickets";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata: Metadata = {
   title: "提交工单",
   description: "选择类别 + 描述问题,我们会在 24 小时内回复。",
 };
 
-type Search = Promise<{ ok?: string; err?: string; category?: string }>;
+const loadSearch = createLoader({
+  ok: parseAsString,
+  err: parseAsString,
+  category: parseAsString,
+});
 
 const PRI: TicketPriority[] = ["low", "normal", "high", "urgent"];
 
-export default async function ContactPage({ searchParams }: { searchParams: Search }) {
-  const sp = await searchParams;
+export default async function ContactPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await loadSearch(searchParams);
   const me = await getCurrentUser();
   const defaultCat = (sp.category || "other").trim();
 

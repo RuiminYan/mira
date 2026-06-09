@@ -6,18 +6,23 @@ import { getCurrentUser } from "@/lib/auth";
 import { DashboardShell, PanelTitle } from "@/components/DashboardLayout";
 import { PARTNER_NAV as NAV } from "@/lib/nav";
 import { createShortlist } from "@/app/actions/favorites";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "选角清单" };
+
+const loadSearch = createLoader({
+  err: parseAsString,
+});
 
 export default async function ShortlistsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ err?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?role=partner&next=/partner/shortlists");
   if (u.role !== "partner" && u.role !== "admin") redirect("/");
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
 
   const lists = db
     .select({

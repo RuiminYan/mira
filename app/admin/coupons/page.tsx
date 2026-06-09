@@ -6,18 +6,24 @@ import { DashboardShell, PanelTitle } from "@/components/DashboardLayout";
 import { ADMIN_NAV as NAV } from "@/lib/nav";
 import { archiveCoupon, createCoupon, reactivateCoupon } from "@/app/actions/coupons";
 import { couponKindLabel } from "@/lib/coupon";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "优惠券管理" };
+
+const loadSearch = createLoader({
+  ok: parseAsString,
+  err: parseAsString,
+});
 
 export default async function AdminCouponsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ok?: string; err?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?role=admin&next=/admin/coupons");
   if (u.role !== "admin") redirect("/");
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const list = db
     .select()
     .from(schema.coupons)

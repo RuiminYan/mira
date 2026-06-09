@@ -6,18 +6,26 @@ import { getCurrentUser } from "@/lib/auth";
 import { getCredits, CREDIT_TIERS } from "@/lib/studio";
 import { rechargeCredits } from "@/app/actions/studio";
 import { getLocale, t } from "@/lib/i18n";
-
-type Search = Promise<{ ok?: string; err?: string }>;
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "充值算力" };
 
-export default async function StudioCreditsPage({ searchParams }: { searchParams: Search }) {
+const loadSearch = createLoader({
+  ok: parseAsString,
+  err: parseAsString,
+});
+
+export default async function StudioCreditsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?next=/studio/credits");
 
   const locale = await getLocale();
   const tr = (k: string, v?: Record<string, string | number>) => t(k, locale, v);
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const credits = getCredits(u.id);
   const history = db
     .select()

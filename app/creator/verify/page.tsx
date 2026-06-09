@@ -7,10 +7,15 @@ import { getCurrentUser } from "@/lib/auth";
 import { DashboardShell, PanelTitle } from "@/components/DashboardLayout";
 import { submitVerification } from "@/app/actions/verifications";
 import { CREATOR_NAV as NAV } from "@/lib/nav";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "实名认证" };
 
-type Search = Promise<{ ok?: string; err?: string; next?: string }>;
+const loadSearch = createLoader({
+  ok: parseAsString,
+  err: parseAsString,
+  next: parseAsString,
+});
 
 const ERR_MAP: Record<string, string> = {
   name: "姓名长度需在 2 到 30 个字符之间",
@@ -18,8 +23,12 @@ const ERR_MAP: Record<string, string> = {
   phone: "手机号需为 11 位数字",
 };
 
-export default async function VerifyPage({ searchParams }: { searchParams: Search }) {
-  const sp = await searchParams;
+export default async function VerifyPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await loadSearch(searchParams);
   const u = await getCurrentUser();
   if (!u) redirect("/login?role=creator&next=/creator/verify");
   if (u.role !== "creator" && u.role !== "admin") redirect("/");

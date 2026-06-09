@@ -5,8 +5,13 @@ import { getCurrentUser } from "@/lib/auth";
 import { DashboardShell, PanelTitle } from "@/components/DashboardLayout";
 import { ADMIN_NAV } from "@/lib/nav";
 import { updateLeadStatus } from "@/app/actions/plans";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "企业咨询" };
+
+const loadSearch = createLoader({
+  ok: parseAsString,
+});
 
 const NAV = [...ADMIN_NAV, { href: "/admin/plans", label: "套餐管理" }, { href: "/admin/enterprise-leads", label: "企业咨询" }];
 
@@ -26,12 +31,12 @@ const STATUS_TONE: Record<string, string> = {
 export default async function AdminEnterpriseLeadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ok?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?role=admin&next=/admin/enterprise-leads");
   if (u.role !== "admin") redirect("/");
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
 
   const leads = db
     .select()

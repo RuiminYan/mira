@@ -7,23 +7,32 @@ import { getCredits, JOB_COSTS } from "@/lib/studio";
 import { submitStudioJob } from "@/app/actions/studio";
 import { getNftByTalentId } from "@/lib/nft";
 import { getLocale, t } from "@/lib/i18n";
-
-type Search = Promise<{ kind?: string; talentId?: string; err?: string }>;
+import { createLoader, parseAsString, parseAsInteger } from "nuqs/server";
 
 export const metadata = { title: "新建生成作业" };
 
-export default async function NewStudioJobPage({ searchParams }: { searchParams: Search }) {
+const loadSearch = createLoader({
+  kind: parseAsString,
+  talentId: parseAsInteger,
+  err: parseAsString,
+});
+
+export default async function NewStudioJobPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?next=/studio");
 
   const locale = await getLocale();
   const tr = (k: string, v?: Record<string, string | number>) => t(k, locale, v);
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const kind = (sp.kind === "video" || sp.kind === "tts" ? sp.kind : "image") as
     | "image"
     | "video"
     | "tts";
-  const defaultTalentId = sp.talentId ? Number(sp.talentId) : undefined;
+  const defaultTalentId = sp.talentId ?? undefined;
   const cost = JOB_COSTS[kind];
   const credits = getCredits(u.id);
 

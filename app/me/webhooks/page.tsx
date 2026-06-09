@@ -8,17 +8,20 @@ import {
   parseHookEvents,
 } from "@/lib/webhooks";
 import { createWebhook, deleteWebhook, pauseWebhook, testWebhook } from "@/app/actions/webhooks";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "我的 Webhook" };
+
+const loadSearch = createLoader({ ok: parseAsString, err: parseAsString });
 
 export default async function MyWebhooksPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ok?: string; err?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?next=/me/webhooks");
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
 
   const hooks = db
     .select()

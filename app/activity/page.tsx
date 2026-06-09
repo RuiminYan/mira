@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { desc, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { createLoader, parseAsInteger } from "nuqs/server";
 
 export const metadata = { title: "正在发生 · 活动流" };
 
 const PAGE_SIZE = 20;
 
-type Search = Promise<{ p?: string }>;
+const loadSearch = createLoader({
+  p: parseAsInteger.withDefault(1),
+});
 
 const KIND_LABEL: Record<string, string> = {
   order_settled: "结算",
@@ -32,9 +35,13 @@ function fmtRelative(ts: number): string {
   return `${d.getMonth() + 1}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-export default async function ActivityPage({ searchParams }: { searchParams: Search }) {
-  const sp = await searchParams;
-  const page = Math.max(1, Number(sp.p) || 1);
+export default async function ActivityPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await loadSearch(searchParams);
+  const page = Math.max(1, sp.p);
   const offset = (page - 1) * PAGE_SIZE;
 
   const total = db.select({ c: sql<number>`count(*)` }).from(schema.activities).get();

@@ -4,9 +4,14 @@ import type { Metadata } from "next";
 import { getHelp, HELP_ARTICLES, helpVoteSummary, helpsByCategory } from "@/lib/help";
 import { getLocale, t } from "@/lib/i18n";
 import { voteHelpArticle } from "@/app/actions/tickets";
+import { createLoader, parseAsString } from "nuqs/server";
 
 type Params = Promise<{ slug: string }>;
-type Search = Promise<{ voted?: string; err?: string }>;
+
+const loadSearch = createLoader({
+  voted: parseAsString,
+  err: parseAsString,
+});
 
 export function generateStaticParams() {
   return HELP_ARTICLES.map((a) => ({ slug: a.slug }));
@@ -27,10 +32,10 @@ export default async function HelpDetailPage({
   searchParams,
 }: {
   params: Params;
-  searchParams: Search;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const p = await params;
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const a = getHelp(p.slug);
   if (!a) notFound();
   const locale = await getLocale();

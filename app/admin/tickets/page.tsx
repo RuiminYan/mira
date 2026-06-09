@@ -16,16 +16,17 @@ import {
   type TicketPriority,
 } from "@/lib/tickets";
 import { batchUpdateTicketsAction, assignSelf, changeTicketStatus } from "@/app/actions/tickets";
+import { createLoader, parseAsString } from "nuqs/server";
 
-type Search = Promise<{
-  status?: string;
-  cat?: string;
-  pri?: string;
-  assign?: string;
-  sort?: string;
-  iu?: string;
-  ok?: string;
-}>;
+const loadSearch = createLoader({
+  status: parseAsString,
+  cat: parseAsString,
+  pri: parseAsString,
+  assign: parseAsString,
+  sort: parseAsString,
+  iu: parseAsString,
+  ok: parseAsString,
+});
 
 const STATUS_TONE: Record<string, string> = {
   open: "bg-amber-500/15 text-amber-300",
@@ -55,12 +56,16 @@ function buildHref(params: Record<string, string | undefined>): string {
   return s ? `/admin/tickets?${s}` : "/admin/tickets";
 }
 
-export default async function AdminTicketsList({ searchParams }: { searchParams: Search }) {
+export default async function AdminTicketsList({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const me = await getCurrentUser();
   if (!me) redirect("/login?role=admin&next=/admin/tickets");
   if (me.role !== "admin") redirect("/");
 
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
 
   const statusFilter = (TICKET_STATUS_LIST as string[]).includes(sp.status || "")
     ? (sp.status as TicketStatus)
@@ -368,7 +373,7 @@ function Select({
   current: string;
   options: { value: string; label: string }[];
   searchKeys: string[];
-  sp: Record<string, string | undefined>;
+  sp: Record<string, string | null | undefined>;
 }) {
   return (
     <form className="flex items-center gap-2">

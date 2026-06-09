@@ -5,20 +5,25 @@ import { getCurrentUser } from "@/lib/auth";
 import { DashboardShell, PanelTitle } from "@/components/DashboardLayout";
 import { ADMIN_NAV } from "@/lib/nav";
 import { archivePlan } from "@/app/actions/plans";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "套餐管理" };
 
 const NAV = [...ADMIN_NAV, { href: "/admin/plans", label: "套餐管理" }, { href: "/admin/enterprise-leads", label: "企业咨询" }];
 
+const loadSearch = createLoader({
+  ok: parseAsString,
+});
+
 export default async function AdminPlansPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ok?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?role=admin&next=/admin/plans");
   if (u.role !== "admin") redirect("/");
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
 
   const plans = db.select().from(schema.plans).orderBy(desc(schema.plans.sortOrder)).all();
   const subs = db

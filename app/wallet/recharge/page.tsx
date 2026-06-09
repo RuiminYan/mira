@@ -2,8 +2,11 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { rechargeWallet } from "@/app/actions/wallet";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "钱包充值" };
+
+const loadSearch = createLoader({ err: parseAsString });
 
 const TIERS = [
   { value: 100, label: "¥100", sub: "小试" },
@@ -21,11 +24,11 @@ const CHANNELS: { value: "wechat" | "alipay" | "bank"; label: string; sub: strin
 export default async function RechargePage({
   searchParams,
 }: {
-  searchParams: Promise<{ err?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?next=/wallet/recharge");
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
 
   return (
     <section className="container-page py-10 md:py-14">
