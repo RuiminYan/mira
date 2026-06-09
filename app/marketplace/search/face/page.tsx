@@ -6,16 +6,21 @@ import { db, schema } from "@/db";
 import { getCurrentUser } from "@/lib/auth";
 import { findSimilarFaces } from "@/lib/search";
 import { FaceUploader } from "@/components/FaceUploader";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const metadata = { title: "图搜脸" };
 
-type Search = Promise<{ url?: string; err?: string }>;
+const loadSearch = createLoader({ url: parseAsString, err: parseAsString });
 
-export default async function FaceSearchPage({ searchParams }: { searchParams: Search }) {
+export default async function FaceSearchPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?next=/marketplace/search/face");
 
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
   const url = sp.url ?? null;
 
   const all = db

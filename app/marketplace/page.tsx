@@ -8,6 +8,8 @@ import Link from "next/link";
 import { cosineByTags } from "@/lib/search";
 import { ActivityMarquee } from "@/components/ActivityMarquee";
 import { getLocale, t } from "@/lib/i18n";
+import { createLoader, parseAsString, parseAsStringEnum, parseAsInteger } from "nuqs/server";
+import { parseAsFlag } from "@/lib/searchParams";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -21,20 +23,24 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-type Search = Promise<{
-  q?: string;
-  g?: string;
-  gd?: string;
-  ex?: string;
-  pmin?: string;
-  pmax?: string;
-  sim?: string;
-}>;
+const loadSearch = createLoader({
+  q: parseAsString.withDefault(""),
+  g: parseAsStringEnum<"female" | "male" | "neutral">(["female", "male", "neutral"]),
+  gd: parseAsStringEnum<"S" | "A" | "B">(["S", "A", "B"]),
+  ex: parseAsFlag.withDefault(false),
+  pmin: parseAsInteger,
+  pmax: parseAsInteger,
+  sim: parseAsFlag.withDefault(false),
+});
 
-export default async function MarketplacePage({ searchParams }: { searchParams: Search }) {
+export default async function MarketplacePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const locale = await getLocale();
   const tr = (k: string, v?: Record<string, string | number>) => t(k, locale, v);
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
 
   const GENDERS = [
     { v: "", label: tr("market.filter.all_genders") },
@@ -50,13 +56,13 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
   ];
 
   const filters: SQL[] = [eq(schema.talents.status, "live")];
-  if (sp.g) filters.push(eq(schema.talents.gender, sp.g as "female" | "male" | "neutral"));
-  if (sp.gd) filters.push(eq(schema.talents.grade, sp.gd as "S" | "A" | "B"));
-  if (sp.ex === "1") filters.push(eq(schema.talents.exclusive, true));
-  if (sp.pmin) filters.push(gte(schema.talents.priceOnce, Number(sp.pmin)));
-  if (sp.pmax) filters.push(lte(schema.talents.priceOnce, Number(sp.pmax)));
+  if (sp.g) filters.push(eq(schema.talents.gender, sp.g));
+  if (sp.gd) filters.push(eq(schema.talents.grade, sp.gd));
+  if (sp.ex) filters.push(eq(schema.talents.exclusive, true));
+  if (sp.pmin) filters.push(gte(schema.talents.priceOnce, sp.pmin));
+  if (sp.pmax) filters.push(lte(schema.talents.priceOnce, sp.pmax));
 
-  const useSim = sp.sim === "1" && !!sp.q;
+  const useSim = sp.sim && !!sp.q;
 
   let list = db
     .select()
@@ -101,22 +107,22 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
               name="g"
               label={tr("market.filter.gender.label")}
               options={GENDERS}
-              defaultValue={sp.g}
+              defaultValue={sp.g ?? undefined}
             />
             <FilterSelect
               name="gd"
               label={tr("market.filter.grade.label")}
               options={GRADES}
-              defaultValue={sp.gd}
+              defaultValue={sp.gd ?? undefined}
             />
-            <FilterField name="pmin" label={tr("market.filter.pmin")} placeholder="¥" defaultValue={sp.pmin} type="number" />
-            <FilterField name="pmax" label={tr("market.filter.pmax")} placeholder="¥" defaultValue={sp.pmax} type="number" />
+            <FilterField name="pmin" label={tr("market.filter.pmin")} placeholder="¥" defaultValue={sp.pmin?.toString()} type="number" />
+            <FilterField name="pmax" label={tr("market.filter.pmax")} placeholder="¥" defaultValue={sp.pmax?.toString()} type="number" />
             <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-line px-3 py-2 text-[13px] text-ink-2">
               <input
                 type="checkbox"
                 name="ex"
                 value="1"
-                defaultChecked={sp.ex === "1"}
+                defaultChecked={sp.ex}
                 className="accent-[#6E59F6]"
               />
               {tr("market.filter.exclusive")}
@@ -126,7 +132,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
                 type="checkbox"
                 name="sim"
                 value="1"
-                defaultChecked={sp.sim === "1"}
+                defaultChecked={sp.sim}
                 className="accent-[#6E59F6]"
               />
               <Wand2 size={12} /> {tr("market.filter.sim")}

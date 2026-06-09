@@ -8,6 +8,7 @@ import { PwaInstallButton } from "@/components/PwaInstallButton";
 import { OnboardingTour } from "@/components/OnboardingTour";
 import { CookieConsent } from "@/components/CookieConsent";
 import { CommandPalette } from "@/components/CommandPalette";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { getCurrentUser } from "@/lib/auth";
 import { SITE_NAME, SITE_TAGLINE, SITE_DESCRIPTION } from "@/lib/site";
 import { getLocale, t, htmlLang, setLocaleAction } from "@/lib/i18n";
@@ -124,7 +125,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           switchAction={setLocaleAction}
         />
         <CommandPalette />
-        <main id="main" tabIndex={-1}>{children}</main>
+        <main id="main" tabIndex={-1}>
+          <NuqsAdapter>{children}</NuqsAdapter>
+        </main>
         <SiteFooter />
         <SwRegister />
         <PwaInstallButton label={tr("pwa.install")} />

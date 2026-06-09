@@ -5,19 +5,20 @@ import { getCurrentUser } from "@/lib/auth";
 import { DashboardShell, PanelTitle } from "@/components/DashboardLayout";
 import { ADMIN_NAV as NAV } from "@/lib/nav";
 import { AUDIT_ACTION_LABEL } from "@/lib/audit";
+import { createLoader, parseAsString, parseAsInteger } from "nuqs/server";
 
 export const metadata = { title: "审计日志" };
 
-type Search = Promise<{
-  action?: string;
-  actor?: string;
-  from?: string;
-  to?: string;
-}>;
+const loadSearch = createLoader({
+  action: parseAsString,
+  actor: parseAsInteger,
+  from: parseAsString,
+  to: parseAsString,
+});
 
 const PAGE_SIZE = 50;
 
-function tsFromDate(s: string | undefined): number | null {
+function tsFromDate(s: string | null | undefined): number | null {
   if (!s) return null;
   const t = Date.parse(s + "T00:00:00");
   if (isNaN(t)) return null;
@@ -29,19 +30,20 @@ function fmt(ts: number): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
-export default async function AuditLogPage({ searchParams }: { searchParams: Search }) {
+export default async function AuditLogPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const u = await getCurrentUser();
   if (!u) redirect("/login?role=admin&next=/admin/audit");
   if (u.role !== "admin") redirect("/");
 
-  const sp = await searchParams;
+  const sp = await loadSearch(searchParams);
 
   const filters: SQL[] = [];
   if (sp.action) filters.push(eq(schema.auditLogs.action, sp.action));
-  if (sp.actor) {
-    const actorId = Number(sp.actor);
-    if (Number.isFinite(actorId)) filters.push(eq(schema.auditLogs.actorId, actorId));
-  }
+  if (sp.actor) filters.push(eq(schema.auditLogs.actorId, sp.actor));
   const fromTs = tsFromDate(sp.from);
   const toTs = tsFromDate(sp.to);
   if (fromTs) filters.push(gte(schema.auditLogs.createdAt, fromTs));
@@ -84,7 +86,7 @@ export default async function AuditLogPage({ searchParams }: { searchParams: Sea
           <span className="text-[11px] uppercase tracking-widest text-ink-3">操作人 ID</span>
           <input
             name="actor"
-            defaultValue={sp.actor}
+            defaultValue={sp.actor ?? undefined}
             placeholder="user id"
             className="rounded-md bg-bg/40 border border-line px-3 py-2 text-[13px] text-ink w-32"
           />
@@ -94,7 +96,7 @@ export default async function AuditLogPage({ searchParams }: { searchParams: Sea
           <input
             name="from"
             type="date"
-            defaultValue={sp.from}
+            defaultValue={sp.from ?? undefined}
             className="rounded-md bg-bg/40 border border-line px-3 py-2 text-[13px] text-ink"
           />
         </label>
@@ -103,7 +105,7 @@ export default async function AuditLogPage({ searchParams }: { searchParams: Sea
           <input
             name="to"
             type="date"
-            defaultValue={sp.to}
+            defaultValue={sp.to ?? undefined}
             className="rounded-md bg-bg/40 border border-line px-3 py-2 text-[13px] text-ink"
           />
         </label>

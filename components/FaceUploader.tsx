@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useQueryState, parseAsString } from "nuqs";
 import { Camera, Loader2 } from "lucide-react";
 
 export function FaceUploader({ defaultUrl }: { defaultUrl?: string }) {
-  const router = useRouter();
+  const [, setUrl] = useQueryState(
+    "url",
+    parseAsString.withDefault("").withOptions({ shallow: false }),
+  );
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(defaultUrl ?? null);
@@ -27,8 +30,7 @@ export function FaceUploader({ defaultUrl }: { defaultUrl?: string }) {
         return;
       }
       setPreview(j.url);
-      router.replace(`/marketplace/search/face?url=${encodeURIComponent(j.url)}`);
-      router.refresh();
+      await setUrl(j.url);
     } catch {
       setErr("NETWORK");
     } finally {
