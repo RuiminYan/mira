@@ -274,6 +274,7 @@ function UserMenu({ user, labels }: { user: HeaderUser; labels: HeaderLabels }) 
     await fetch("/api/auth/logout", { method: "POST" });
     setOpen(false);
     router.refresh();
+    // allow-button-nav: 登出是 POST mutation,fetch 后程序化重定向回首页,非链接
     router.push("/");
   }
 
@@ -412,6 +413,7 @@ function MobileLogout({ onDone, label }: { onDone: () => void; label: string }) 
         await fetch("/api/auth/logout", { method: "POST" });
         onDone();
         router.refresh();
+        // allow-button-nav: 登出是 POST mutation,fetch 后程序化重定向回首页,非链接
         router.push("/");
       }}
       className="flex-1 rounded-md border border-line-2 px-3 py-2 text-[14px] text-ink-3"

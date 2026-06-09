@@ -31,6 +31,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # 约定/不变量守卫 (vitest)。含链接导航约定:onClick 里 router.push/replace 当站内导航 → 挂
+      # (中键/Ctrl 新开失效)。写入即拦 hook 是本地层,这里是任何来源的 CI 最终防线。
+      - name: Run tests
+        run: pnpm test
+
       # 必须排在 build 之前:静态页 (/sitemap.xml 等) 在构建期就查 DB 预渲染,
       # 没有已建表的 data.db 会报 "no such table"。seed 到默认路径 ./data.db,build 直接读它;
       # 同一份库随包发出去作初始演示数据。

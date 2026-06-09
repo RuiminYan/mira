@@ -32,6 +32,7 @@ export function CommandPalette() {
     const q = String(fd.get("q") || "").trim();
     if (!q) return;
     setOpen(false);
+    // allow-button-nav: 搜索表单提交,目标含动态 query,非静态链接
     router.push(`/search?q=${encodeURIComponent(q)}`);
   }
 
